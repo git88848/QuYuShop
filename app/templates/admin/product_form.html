@@ -1,0 +1,90 @@
+{% extends "admin/base.html" %}
+
+{% block title %}{% if product %}编辑商品{% else %}添加商品{% endif %} - 管理后台{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('admin.index') }}">控制面板</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('admin.product_list') }}">商品管理</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{% if product %}编辑商品{% else %}添加商品{% endif %}</li>
+    </ol>
+</nav>
+
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">{% if product %}编辑商品{% else %}添加商品{% endif %}</h5>
+    </div>
+    <div class="card-body">
+        <form method="post" enctype="multipart/form-data">
+            {{ form.hidden_tag() }}
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        {{ form.name.label(class="form-label") }}
+                        {{ form.name(class="form-control") }}
+                        {% for error in form.name.errors %}
+                        <div class="text-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.category_id.label(class="form-label") }}
+                        {{ form.category_id(class="form-select") }}
+                        {% for error in form.category_id.errors %}
+                        <div class="text-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.price.label(class="form-label") }}
+                        {{ form.price(class="form-control") }}
+                        {% for error in form.price.errors %}
+                        <div class="text-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.stock.label(class="form-label") }}
+                        {{ form.stock(class="form-control") }}
+                        {% for error in form.stock.errors %}
+                        <div class="text-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="mb-3 form-check">
+                        {{ form.status(class="form-check-input") }}
+                        {{ form.status.label(class="form-check-label") }}
+                        {% for error in form.status.errors %}
+                        <div class="text-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        {{ form.image.label(class="form-label") }}
+                        {{ form.image(class="form-control") }}
+                        {% for error in form.image.errors %}
+                        <div class="text-danger">{{ error }}</div>
+                        {% endfor %}
+                        <small class="form-text text-muted">推荐图片尺寸：600×600像素，支持jpg、jpeg、png、gif格式，文件大小不超过2MB</small>
+                        {% if product and product.image %}
+                        <div class="mt-2">
+                            <p>当前图片：</p>
+                            <img src="{{ url_for('static', filename=config['UPLOAD_FOLDER'] + '/' + product.image) }}" alt="{{ product.name }}" style="max-width: 200px; max-height: 200px;">
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.description.label(class="form-label") }}
+                        {{ form.description(class="form-control", rows=8) }}
+                        {% for error in form.description.errors %}
+                        <div class="text-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <div class="d-flex justify-content-between">
+                <a href="{{ url_for('admin.product_list') }}" class="btn btn-secondary">返回</a>
+                {{ form.submit(class="btn btn-primary") }}
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %} 

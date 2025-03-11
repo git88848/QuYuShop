@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block title %}搜索结果 - 发卡系统{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">首页</a></li>
+        <li class="breadcrumb-item active" aria-current="page">搜索结果</li>
+    </ol>
+</nav>
+
+<div class="search-header mb-5" data-aos="fade-up">
+    <div class="card shadow-sm">
+        <div class="card-body p-4">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="display-6 fw-bold mb-2">搜索结果: "{{ keyword }}"</h1>
+                    <p class="lead text-muted mb-0">共找到 {{ products|length }} 个商品</p>
+                </div>
+                <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                    <form class="d-flex search-form" action="{{ url_for('main.search') }}" method="get">
+                        <input class="form-control" type="search" name="q" placeholder="搜索商品" value="{{ keyword }}" required>
+                        <button class="btn" type="submit">
+                            <i class="bi bi-search text-primary"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    {% for product in products %}
+    <div class="col-md-3 mb-4" data-aos="fade-up" data-aos-delay="{{ loop.index * 100 }}">
+        <div class="card h-100">
+            {% if product.image %}
+            <img src="{{ url_for('static', filename=config['UPLOAD_FOLDER'] + '/' + product.image) }}" class="card-img-top" alt="{{ product.name }}">
+            {% else %}
+            <img src="https://via.placeholder.com/300x200?text=No+Image" class="card-img-top" alt="No Image">
+            {% endif %}
+            <div class="card-body">
+                <h5 class="card-title">{{ product.name }}</h5>
+                <p class="card-text text-truncate">{{ product.description }}</p>
+                <p class="card-price">¥{{ "%.2f"|format(product.price) }}</p>
+                <div class="card-meta">
+                    <span><i class="bi bi-box me-1"></i>库存: {{ product.stock }}</span>
+                    <span><i class="bi bi-graph-up me-1"></i>销量: {{ product.sales }}</span>
+                </div>
+            </div>
+            <div class="card-footer">
+                <a href="{{ url_for('main.product', id=product.id) }}" class="btn btn-primary w-100">
+                    <i class="bi bi-eye me-1"></i>查看详情
+                </a>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-12" data-aos="fade-up">
+        <div class="card shadow-sm">
+            <div class="card-body p-5 text-center">
+                <i class="bi bi-search text-muted" style="font-size: 4rem;"></i>
+                <h3 class="mt-3">未找到相关商品</h3>
+                <p class="text-muted">请尝试使用其他关键词搜索，或浏览我们的商品分类</p>
+                <div class="mt-4">
+                    <a href="{{ url_for('main.index') }}" class="btn btn-primary me-2">
+                        <i class="bi bi-house me-1"></i>返回首页
+                    </a>
+                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#searchTipsModal">
+                        <i class="bi bi-info-circle me-1"></i>搜索技巧
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% if products|length > 0 %}
+<div class="text-center mt-4 mb-5" data-aos="fade-up">
+    <a href="{{ url_for('main.index') }}" class="btn btn-outline-primary">
+        <i class="bi bi-arrow-left me-1"></i>返回首页
+    </a>
+</div>
+{% endif %}
+
+<!-- 搜索技巧模态框 -->
+<div class="modal fade" id="searchTipsModal" tabindex="-1" aria-labelledby="searchTipsModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="searchTipsModalLabel">搜索技巧</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <i class="bi bi-check-circle-fill text-success me-2"></i>使用简短、准确的关键词
+                    </li>
+                    <li class="list-group-item">
+                        <i class="bi bi-check-circle-fill text-success me-2"></i>尝试使用商品的类别名称
+                    </li>
+                    <li class="list-group-item">
+                        <i class="bi bi-check-circle-fill text-success me-2"></i>避免使用特殊字符和标点符号
+                    </li>
+                    <li class="list-group-item">
+                        <i class="bi bi-check-circle-fill text-success me-2"></i>如果找不到结果，尝试使用同义词
+                    </li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">明白了</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

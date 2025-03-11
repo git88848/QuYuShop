@@ -1,0 +1,330 @@
+{% extends "base.html" %}
+
+{% block title %}{{ product.name }} - 发卡系统{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">首页</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('main.category', id=product.category_id) }}">{{ product.category.name }}</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ product.name }}</li>
+    </ol>
+</nav>
+
+<div class="card shadow-sm mb-5" data-aos="fade-up">
+    <div class="card-body p-0">
+        <div class="row g-0">
+            <div class="col-md-5">
+                <div class="product-image-container">
+                    {% if product.image and product.image.strip() %}
+                    <img src="{{ url_for('static', filename=config['UPLOAD_FOLDER'] + '/' + product.image) }}" class="img-fluid rounded-start" alt="{{ product.name }}">
+                    {% else %}
+                    <img src="{{ url_for('static', filename='uploads/credit-cards.jpg') }}" class="img-fluid rounded-start" alt="{{ product.name }}">
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-md-7">
+                <div class="p-4 p-md-5">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="badge bg-info">{{ product.category.name }}</span>
+                        <div class="product-meta">
+                            <span class="me-3"><i class="bi bi-box me-1"></i>库存：{{ product.stock }}</span>
+                            <span><i class="bi bi-graph-up me-1"></i>销量：{{ product.sales }}</span>
+                        </div>
+                    </div>
+                    
+                    <h1 class="display-6 fw-bold mb-3">{{ product.name }}</h1>
+                    <div class="mb-4">
+                        <span class="h2 text-danger fw-bold">¥{{ "%.2f"|format(product.price) }}</span>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h5 class="border-bottom pb-2 mb-3">商品描述</h5>
+                        <div class="product-description">
+                            {{ product.description|nl2br }}
+                        </div>
+                    </div>
+                    
+                    {% if product.stock > 0 %}
+                    <div class="mb-4">
+                        <ul class="nav nav-tabs" id="orderTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="login-tab" data-bs-toggle="tab" data-bs-target="#login-tab-pane" type="button" role="tab" aria-controls="login-tab-pane" aria-selected="true">
+                                    <i class="bi bi-person me-1"></i>登录下单
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="anonymous-tab" data-bs-toggle="tab" data-bs-target="#anonymous-tab-pane" type="button" role="tab" aria-controls="anonymous-tab-pane" aria-selected="false">
+                                    <i class="bi bi-incognito me-1"></i>匿名下单
+                                </button>
+                            </li>
+                        </ul>
+                        <div class="tab-content pt-3" id="orderTabsContent">
+                            <div class="tab-pane fade show active" id="login-tab-pane" role="tabpanel" aria-labelledby="login-tab" tabindex="0">
+                                {% if current_user.is_authenticated %}
+                                <form method="post">
+                                    {{ form.hidden_tag() }}
+                                    <div class="mb-4">
+                                        <div class="row align-items-center">
+                                            <div class="col-auto">
+                                                {{ form.quantity.label(class="form-label fw-bold mb-0") }}
+                                            </div>
+                                            <div class="col-auto">
+                                                <div class="input-group">
+                                                    <button type="button" class="btn btn-outline-secondary" id="decrease-qty">
+                                                        <i class="bi bi-dash"></i>
+                                                    </button>
+                                                    {{ form.quantity(class="form-control text-center", min=1, max=product.stock, style="width: 80px;") }}
+                                                    <button type="button" class="btn btn-outline-secondary" id="increase-qty">
+                                                        <i class="bi bi-plus"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="col-auto">
+                                                <span class="form-text">最大可购买数量：{{ product.stock }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-4">
+                                        <div class="d-flex align-items-center">
+                                            <span class="me-3 fw-bold">总价：</span>
+                                            <span class="h3 text-danger fw-bold mb-0">¥<span id="total-price">{{ "%.2f"|format(product.price) }}</span></span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="d-grid gap-2">
+                                        {{ form.submit(class="btn btn-lg order-btn") }}
+                                    </div>
+                                </form>
+                                {% else %}
+                                <div class="alert alert-info mb-4">
+                                    <i class="bi bi-info-circle me-2"></i>
+                                    <span>您尚未登录，请先登录后再下单，或选择匿名下单</span>
+                                </div>
+                                <div class="d-grid gap-2">
+                                    <a href="{{ url_for('auth.login', next=request.url) }}" class="btn btn-primary btn-lg">
+                                        <i class="bi bi-box-arrow-in-right me-2"></i>登录后下单
+                                    </a>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="tab-pane fade" id="anonymous-tab-pane" role="tabpanel" aria-labelledby="anonymous-tab" tabindex="0">
+                                <div class="alert alert-info mb-4">
+                                    <i class="bi bi-info-circle me-2"></i>
+                                    <span>匿名下单无需注册账号，卡密将发送至您填写的邮箱</span>
+                                </div>
+                                <form method="post">
+                                    {{ anon_form.hidden_tag() }}
+                                    <div class="mb-3">
+                                        <label for="email" class="form-label fw-bold">邮箱地址</label>
+                                        {{ anon_form.email(class="form-control", placeholder="用于接收卡密信息") }}
+                                        <div class="form-text">请填写正确的邮箱，卡密将发送至该邮箱</div>
+                                    </div>
+                                    <div class="mb-4">
+                                        <div class="row align-items-center">
+                                            <div class="col-auto">
+                                                {{ anon_form.quantity.label(class="form-label fw-bold mb-0") }}
+                                            </div>
+                                            <div class="col-auto">
+                                                <div class="input-group">
+                                                    <button type="button" class="btn btn-outline-secondary" id="anon-decrease-qty">
+                                                        <i class="bi bi-dash"></i>
+                                                    </button>
+                                                    {{ anon_form.quantity(class="form-control text-center", min=1, max=product.stock, style="width: 80px;", id="anon-quantity") }}
+                                                    <button type="button" class="btn btn-outline-secondary" id="anon-increase-qty">
+                                                        <i class="bi bi-plus"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="col-auto">
+                                                <span class="form-text">最大可购买数量：{{ product.stock }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-4">
+                                        <div class="d-flex align-items-center">
+                                            <span class="me-3 fw-bold">总价：</span>
+                                            <span class="h3 text-danger fw-bold mb-0">¥<span id="anon-total-price">{{ "%.2f"|format(product.price) }}</span></span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="d-grid gap-2">
+                                        {{ anon_form.submit(class="btn btn-lg order-btn") }}
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>该商品已售罄，请关注后续补货
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row" data-aos="fade-up">
+    <div class="col-md-12">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5 class="mb-0">购买须知</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-3 mb-md-0">
+                        <div class="d-flex">
+                            <div class="flex-shrink-0">
+                                <i class="bi bi-shield-check text-success fs-2 me-3"></i>
+                            </div>
+                            <div>
+                                <h5>正品保障</h5>
+                                <p class="text-muted">所有商品均为正规渠道获取，请放心购买。</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3 mb-md-0">
+                        <div class="d-flex">
+                            <div class="flex-shrink-0">
+                                <i class="bi bi-lightning-charge text-warning fs-2 me-3"></i>
+                            </div>
+                            <div>
+                                <h5>自动发货</h5>
+                                <p class="text-muted">付款后系统自动发货，无需等待人工处理。</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="d-flex">
+                            <div class="flex-shrink-0">
+                                <i class="bi bi-headset text-primary fs-2 me-3"></i>
+                            </div>
+                            <div>
+                                <h5>售后保障</h5>
+                                <p class="text-muted">如有问题请联系客服，我们将及时为您解决。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block styles %}
+<style>
+    .product-image-container {
+        height: 400px;
+        background-color: #f8f9fa;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+    
+    .product-image-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .product-description {
+        line-height: 1.8;
+        color: #666;
+    }
+    
+    .product-meta {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+    
+    @media (max-width: 768px) {
+        .product-image-container {
+            height: 300px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const quantityInput = document.getElementById('quantity');
+        const totalPrice = document.getElementById('total-price');
+        const decreaseBtn = document.getElementById('decrease-qty');
+        const increaseBtn = document.getElementById('increase-qty');
+        
+        const anonQuantityInput = document.getElementById('anon-quantity');
+        const anonTotalPrice = document.getElementById('anon-total-price');
+        const anonDecreaseBtn = document.getElementById('anon-decrease-qty');
+        const anonIncreaseBtn = document.getElementById('anon-increase-qty');
+        
+        const productPrice = {{ product.price }};
+        const maxStock = {{ product.stock }};
+        
+        function updateTotalPrice(input, priceElement) {
+            const quantity = parseInt(input.value) || 1;
+            priceElement.textContent = (productPrice * quantity).toFixed(2);
+        }
+        
+        // 登录用户表单
+        if (quantityInput && totalPrice) {
+            quantityInput.addEventListener('change', function() {
+                updateTotalPrice(quantityInput, totalPrice);
+            });
+            
+            if (decreaseBtn) {
+                decreaseBtn.addEventListener('click', function() {
+                    const currentValue = parseInt(quantityInput.value) || 1;
+                    if (currentValue > 1) {
+                        quantityInput.value = currentValue - 1;
+                        updateTotalPrice(quantityInput, totalPrice);
+                    }
+                });
+            }
+            
+            if (increaseBtn) {
+                increaseBtn.addEventListener('click', function() {
+                    const currentValue = parseInt(quantityInput.value) || 1;
+                    if (currentValue < maxStock) {
+                        quantityInput.value = currentValue + 1;
+                        updateTotalPrice(quantityInput, totalPrice);
+                    }
+                });
+            }
+        }
+        
+        // 匿名用户表单
+        if (anonQuantityInput && anonTotalPrice) {
+            anonQuantityInput.addEventListener('change', function() {
+                updateTotalPrice(anonQuantityInput, anonTotalPrice);
+            });
+            
+            if (anonDecreaseBtn) {
+                anonDecreaseBtn.addEventListener('click', function() {
+                    const currentValue = parseInt(anonQuantityInput.value) || 1;
+                    if (currentValue > 1) {
+                        anonQuantityInput.value = currentValue - 1;
+                        updateTotalPrice(anonQuantityInput, anonTotalPrice);
+                    }
+                });
+            }
+            
+            if (anonIncreaseBtn) {
+                anonIncreaseBtn.addEventListener('click', function() {
+                    const currentValue = parseInt(anonQuantityInput.value) || 1;
+                    if (currentValue < maxStock) {
+                        anonQuantityInput.value = currentValue + 1;
+                        updateTotalPrice(anonQuantityInput, anonTotalPrice);
+                    }
+                });
+            }
+        }
+    });
+</script>
+{% endblock %} 

@@ -1,0 +1,387 @@
+{% extends "admin/base.html" %}
+
+{% block title %}系统设置{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3 class="card-title">网站设置</h3>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        <input type="hidden" name="form_type" value="site_settings">
+                        <div class="form-group mb-3">
+                            <label for="site_name">网站名称</label>
+                            <input type="text" class="form-control" id="site_name" 
+                                   name="site_name" value="{{ site_name }}" required>
+                            <small class="form-text text-muted">
+                                显示在导航栏和页面标题中的网站名称。
+                            </small>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="site_title">网站标题</label>
+                            <input type="text" class="form-control" id="site_title" 
+                                   name="site_title" value="{{ site_title }}">
+                            <small class="form-text text-muted">
+                                显示在首页大标题中的文字，留空则使用网站名称。
+                            </small>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="site_description">网站描述</label>
+                            <textarea class="form-control" id="site_description" 
+                                      name="site_description" rows="2">{{ site_description }}</textarea>
+                            <small class="form-text text-muted">
+                                显示在首页的网站简短描述。
+                            </small>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="site_keywords">SEO关键词</label>
+                            <textarea class="form-control" id="site_keywords" 
+                                      name="site_keywords" rows="2">{{ site_keywords }}</textarea>
+                            <small class="form-text text-muted">
+                                用于搜索引擎优化的关键词，多个关键词用英文逗号分隔。
+                            </small>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="site_url">网站域名</label>
+                            <input type="text" class="form-control" id="site_url" 
+                                   name="site_url" value="{{ site_url }}">
+                            <small class="form-text text-muted">
+                                网站的完整域名，如：https://example.com，留空则自动获取当前域名。
+                            </small>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="site_logo">网站Logo</label>
+                            <div class="input-group">
+                                <input type="file" class="form-control" id="site_logo_file" 
+                                       name="site_logo_file" accept="image/png,image/jpeg,image/gif">
+                            </div>
+                            <small class="form-text text-muted">
+                                支持PNG/JPG/GIF格式，建议尺寸：200x50px。上传后将保存为 /static/img/logo.png
+                            </small>
+                            {% if site_logo %}
+                            <div class="mt-2">
+                                <img src="{{ site_logo }}?v={{ now.timestamp()|int }}" alt="当前Logo" style="max-height: 50px;">
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="site_favicon">网站图标</label>
+                            <div class="input-group">
+                                <input type="file" class="form-control" id="site_favicon_file" 
+                                       name="site_favicon_file" accept="image/x-icon,image/png">
+                            </div>
+                            <small class="form-text text-muted">
+                                支持ICO/PNG格式，建议尺寸：32x32px或16x16px。上传后将保存为 /static/img/favicon.ico
+                            </small>
+                            {% if site_favicon %}
+                            <div class="mt-2">
+                                <img src="{{ site_favicon }}?v={{ now.timestamp()|int }}" alt="当前图标" style="width: 32px; height: 32px;">
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="about_us">关于我们</label>
+                            <textarea class="form-control" id="about_us" 
+                                      name="about_us" rows="3">{{ about_us }}</textarea>
+                            <small class="form-text text-muted">
+                                显示在页脚的"关于我们"部分的文本内容。
+                            </small>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="footer_text">页脚文本</label>
+                            <input type="text" class="form-control" id="footer_text" 
+                                   name="footer_text" value="{{ footer_text }}">
+                            <small class="form-text text-muted">
+                                显示在页脚底部的版权文本。
+                            </small>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="footer_link">页脚链接</label>
+                            <input type="text" class="form-control" id="footer_link" 
+                                   name="footer_link" value="{{ footer_link }}">
+                            <small class="form-text text-muted">
+                                页脚文本点击后跳转的链接地址。
+                            </small>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="contact_email">联系邮箱</label>
+                            <input type="email" class="form-control" id="contact_email" 
+                                   name="contact_email" value="{{ contact_email }}">
+                            <small class="form-text text-muted">
+                                显示在页脚的联系邮箱。
+                            </small>
+                        </div>
+                        
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="show_email" 
+                                   name="show_email" value="1" {% if show_email %}checked{% endif %}>
+                            <label class="form-check-label" for="show_email">
+                                显示联系邮箱
+                            </label>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="contact_phone">联系电话</label>
+                            <input type="text" class="form-control" id="contact_phone" 
+                                   name="contact_phone" value="{{ contact_phone }}">
+                            <small class="form-text text-muted">
+                                显示在页脚的联系电话。
+                            </small>
+                        </div>
+                        
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="show_phone" 
+                                   name="show_phone" value="1" {% if show_phone %}checked{% endif %}>
+                            <label class="form-check-label" for="show_phone">
+                                显示联系电话
+                            </label>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="telegram_username">Telegram联系人</label>
+                            <div class="input-group">
+                                <span class="input-group-text">@</span>
+                                <input type="text" class="form-control" id="telegram_username" 
+                                       name="telegram_username" value="{{ telegram_username }}">
+                            </div>
+                            <small class="form-text text-muted">
+                                显示在页脚的Telegram联系人用户名（不需要输入@符号）。
+                            </small>
+                        </div>
+                        
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="show_telegram_username" 
+                                   name="show_telegram_username" value="1" {% if show_telegram_username %}checked{% endif %}>
+                            <label class="form-check-label" for="show_telegram_username">
+                                显示Telegram联系人
+                            </label>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="telegram_channel">Telegram频道</label>
+                            <div class="input-group">
+                                <span class="input-group-text">@</span>
+                                <input type="text" class="form-control" id="telegram_channel" 
+                                       name="telegram_channel" value="{{ telegram_channel }}">
+                            </div>
+                            <small class="form-text text-muted">
+                                显示在页脚的Telegram频道（不需要输入@符号）。
+                            </small>
+                        </div>
+                        
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="show_telegram_channel" 
+                                   name="show_telegram_channel" value="1" {% if show_telegram_channel %}checked{% endif %}>
+                            <label class="form-check-label" for="show_telegram_channel">
+                                显示Telegram频道
+                            </label>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="telegram_group">Telegram群组</label>
+                            <div class="input-group">
+                                <span class="input-group-text">@</span>
+                                <input type="text" class="form-control" id="telegram_group" 
+                                       name="telegram_group" value="{{ telegram_group }}">
+                            </div>
+                            <small class="form-text text-muted">
+                                显示在页脚的Telegram群组（不需要输入@符号）。
+                            </small>
+                        </div>
+                        
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="show_telegram_group" 
+                                   name="show_telegram_group" value="1" {% if show_telegram_group %}checked{% endif %}>
+                            <label class="form-check-label" for="show_telegram_group">
+                                显示Telegram群组
+                            </label>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="site_weixin">微信号</label>
+                            <input type="text" class="form-control" id="site_weixin" 
+                                   name="site_weixin" value="{{ site_weixin }}">
+                            <small class="form-text text-muted">
+                                显示在页脚的微信号。
+                            </small>
+                        </div>
+                        
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="show_weixin" 
+                                   name="show_weixin" value="1" {% if show_weixin %}checked{% endif %}>
+                            <label class="form-check-label" for="show_weixin">
+                                显示微信号
+                            </label>
+                        </div>
+                        
+                        <h5 class="mt-4 mb-3">验证码设置</h5>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="enable_captcha" 
+                                   name="enable_captcha" value="1" {% if enable_captcha %}checked{% endif %}>
+                            <label class="form-check-label" for="enable_captcha">
+                                启用注册验证码
+                            </label>
+                            <small class="form-text text-muted d-block">
+                                开启后，用户注册时需要输入图形验证码，有效防止机器人注册。
+                            </small>
+                        </div>
+                        
+                        <h5 class="mt-4 mb-3">Telegram机器人通知设置</h5>
+                        <div class="form-group mb-3">
+                            <label for="telegram_bot_token">Telegram机器人Token</label>
+                            <input type="text" class="form-control" id="telegram_bot_token" 
+                                   name="telegram_bot_token" value="{{ telegram_bot_token }}">
+                            <small class="form-text text-muted">
+                                从BotFather获取的Telegram机器人Token。
+                            </small>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="telegram_chat_id">Telegram通知接收Chat ID</label>
+                            <input type="text" class="form-control" id="telegram_chat_id" 
+                                   name="telegram_chat_id" value="{{ telegram_chat_id }}">
+                            <small class="form-text text-muted">
+                                接收通知的Telegram聊天ID，可以是个人用户ID或群组ID。
+                            </small>
+                        </div>
+                        
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="enable_order_notification" 
+                                   name="enable_order_notification" value="1" {% if enable_order_notification %}checked{% endif %}>
+                            <label class="form-check-label" for="enable_order_notification">
+                                启用下单成功通知
+                            </label>
+                            <small class="form-text text-muted d-block">
+                                开启后，用户成功下单时会向Telegram发送通知。
+                            </small>
+                        </div>
+                        
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="enable_payment_notification" 
+                                   name="enable_payment_notification" value="1" {% if enable_payment_notification %}checked{% endif %}>
+                            <label class="form-check-label" for="enable_payment_notification">
+                                启用支付成功通知
+                            </label>
+                            <small class="form-text text-muted d-block">
+                                开启后，用户成功支付订单时会向Telegram发送通知。
+                            </small>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">保存设置</button>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3 class="card-title">订单设置</h3>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        <input type="hidden" name="form_type" value="order_settings">
+                        <div class="form-group mb-3">
+                            <label for="order_expire_minutes">订单过期时间（分钟）</label>
+                            <input type="number" class="form-control" id="order_expire_minutes" 
+                                   name="order_expire_minutes" value="{{ order_expire_minutes }}" 
+                                   min="1" required>
+                            <small class="form-text text-muted">
+                                订单创建后，在此时间内未支付将自动过期。建议设置为5-30分钟之间。
+                            </small>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="order_check_interval">自动检查间隔（秒）</label>
+                            <input type="number" class="form-control" id="order_check_interval" 
+                                   name="order_check_interval" value="{{ order_check_interval }}" 
+                                   min="10" max="3600" required>
+                            <small class="form-text text-muted">
+                                系统自动检查过期订单的时间间隔。建议设置为30-300秒之间，过小的值可能会增加服务器负担。
+                                <br>注意：修改此设置后需要重启应用才能生效。
+                            </small>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">保存设置</button>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">订单维护</h3>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        系统会<strong>每{{ order_check_interval }}秒</strong>自动检查并处理过期订单，但您也可以手动触发过期订单处理。
+                    </div>
+                    <a href="{{ url_for('admin.handle_expired_orders_view') }}" class="btn btn-warning">
+                        <i class="bi bi-clock-history me-1"></i>手动处理过期订单
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 处理Logo文件上传
+    document.getElementById('site_logo_file').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            // 预览图片
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const previewContainer = document.querySelector('#site_logo_file').closest('.form-group').querySelector('.mt-2');
+                if (previewContainer) {
+                    previewContainer.innerHTML = `<img src="${e.target.result}" alt="Logo预览" style="max-height: 50px;">`;
+                } else {
+                    const newPreview = document.createElement('div');
+                    newPreview.className = 'mt-2';
+                    newPreview.innerHTML = `<img src="${e.target.result}" alt="Logo预览" style="max-height: 50px;">`;
+                    document.getElementById('site_logo_file').closest('.form-group').appendChild(newPreview);
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // 处理Favicon文件上传
+    document.getElementById('site_favicon_file').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            // 预览图片
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const previewContainer = document.querySelector('#site_favicon_file').closest('.form-group').querySelector('.mt-2');
+                if (previewContainer) {
+                    previewContainer.innerHTML = `<img src="${e.target.result}" alt="图标预览" style="width: 32px; height: 32px;">`;
+                } else {
+                    const newPreview = document.createElement('div');
+                    newPreview.className = 'mt-2';
+                    newPreview.innerHTML = `<img src="${e.target.result}" alt="图标预览" style="width: 32px; height: 32px;">`;
+                    document.getElementById('site_favicon_file').closest('.form-group').appendChild(newPreview);
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+});
+</script>
+{% endblock %} 

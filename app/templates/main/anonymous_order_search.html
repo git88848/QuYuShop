@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}匿名订单查询 - 发卡系统{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8" data-aos="fade-up">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white py-3">
+                    <h4 class="mb-0"><i class="bi bi-search me-2"></i>匿名订单查询</h4>
+                </div>
+                <div class="card-body p-4">
+                    <div class="alert alert-info mb-4">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <span>请输入您的订单号和下单时使用的邮箱进行查询</span>
+                    </div>
+                    
+                    <form method="POST" action="{{ url_for('main.anonymous_order_query') }}">
+                        <div class="mb-3">
+                            <label for="order_id" class="form-label">订单号</label>
+                            <input type="text" class="form-control" id="order_id" name="order_id" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">邮箱</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-search me-2"></i>查询订单
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="card shadow-sm" data-aos="fade-up" data-aos-delay="100">
+                <div class="card-body p-4">
+                    <h5 class="card-title mb-3"><i class="bi bi-info-circle me-2"></i>查询说明</h5>
+                    <ul class="mb-0">
+                        <li class="mb-2">订单号是您下单时系统生成的唯一编号</li>
+                        <li class="mb-2">邮箱是您下单时填写的接收卡密的邮箱</li>
+                        <li class="mb-2">如果您忘记了订单号，请检查您的邮箱是否收到了订单确认邮件</li>
+                        <li class="mb-2">如果您无法查询到订单，请联系客服处理</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

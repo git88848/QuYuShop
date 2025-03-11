@@ -1,0 +1,220 @@
+{% extends "admin/base.html" %}
+
+{% block title %}访问统计 - 管理后台{% endblock %}
+
+{% block content %}
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">访问统计</h1>
+    <span class="d-none d-sm-inline-block text-secondary">
+        <i class="bi bi-clock me-1"></i>{{ now.strftime('%Y-%m-%d %H:%M:%S') }}
+    </span>
+</div>
+
+<!-- 统计卡片 -->
+<div class="row mb-4">
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-primary shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                            总访问量</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_views }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-eye-fill fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-success shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                            今日访问量</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ today_views }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-calendar-day fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-info shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                            本周访问量</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ week_views }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-calendar-week fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-warning shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                            本月访问量</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ month_views }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-calendar-month fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- 每日访问量图表 -->
+    <div class="col-lg-8 mb-4">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">最近30天访问量趋势</h5>
+            </div>
+            <div class="card-body">
+                <div class="chart-container" style="position: relative; height:300px;">
+                    <canvas id="dailyViewsChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 访问量最多的页面 -->
+    <div class="col-lg-4 mb-4">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">热门页面</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>页面路径</th>
+                                <th>访问量</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for page in top_pages %}
+                            <tr>
+                                <td>{{ page.path }}</td>
+                                <td>{{ page.count }}</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="2" class="text-center">暂无数据</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 最近访问记录 -->
+<div class="card mb-4">
+    <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-primary">最近访问记录</h6>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>页面路径</th>
+                        <th>IP地址</th>
+                        <th>用户</th>
+                        <th>来源页面</th>
+                        <th>访问时间</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for view in recent_views %}
+                    <tr>
+                        <td>{{ view.id }}</td>
+                        <td>{{ view.path }}</td>
+                        <td>{{ view.ip }}</td>
+                        <td>
+                            {% if view.user %}
+                                {{ view.user.username }}
+                            {% else %}
+                                <span class="badge bg-secondary">匿名用户</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ view.referer or '-' }}</td>
+                        <td>{{ view.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center">暂无记录</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 每日访问量图表
+        const dailyViewsCtx = document.getElementById('dailyViewsChart').getContext('2d');
+        const dailyViewsChart = new Chart(dailyViewsCtx, {
+            type: 'line',
+            data: {
+                labels: [{% for day in daily_views %}'{{ day.date }}'{% if not loop.last %}, {% endif %}{% endfor %}],
+                datasets: [{
+                    label: '访问量',
+                    data: [{% for day in daily_views %}{{ day.count }}{% if not loop.last %}, {% endif %}{% endfor %}],
+                    backgroundColor: 'rgba(78, 115, 223, 0.05)',
+                    borderColor: 'rgba(78, 115, 223, 1)',
+                    pointBackgroundColor: 'rgba(78, 115, 223, 1)',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: 'rgba(78, 115, 223, 1)',
+                    borderWidth: 2,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %} 

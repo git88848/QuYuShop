@@ -1,0 +1,244 @@
+{% extends "admin/base.html" %}
+
+{% block title %}订单管理 - 管理后台{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>订单管理</h1>
+    <div>
+        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteAllModal">
+            <i class="bi bi-trash me-1"></i>一键删除所有订单
+        </button>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">筛选条件</h5>
+    </div>
+    <div class="card-body">
+        <form method="get" action="{{ url_for('admin.order_list') }}">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label for="status" class="form-label">订单状态</label>
+                        <select name="status" id="status" class="form-select">
+                            <option value="">全部状态</option>
+                            <option value="0" {% if status == 0 %}selected{% endif %}>未支付</option>
+                            <option value="1" {% if status == 1 %}selected{% endif %}>已支付</option>
+                            <option value="2" {% if status == 2 %}selected{% endif %}>已完成</option>
+                            <option value="-1" {% if status == -1 %}selected{% endif %}>已取消</option>
+                            <option value="-2" {% if status == -2 %}selected{% endif %}>已过期</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="mb-3">
+                        <label class="form-label">&nbsp;</label>
+                        <button type="submit" class="btn btn-primary d-block w-100">筛选</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">订单列表</h5>
+        <div>
+            <button id="batchDeleteBtn" class="btn btn-sm btn-danger" disabled>
+                <i class="bi bi-trash me-1"></i>批量删除
+            </button>
+        </div>
+    </div>
+    <div class="card-body">
+        <form id="batchForm" method="post" action="{{ url_for('admin.order_batch_delete') }}">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="selectAll">
+                                </div>
+                            </th>
+                            <th>订单号</th>
+                            <th>用户</th>
+                            <th>商品</th>
+                            <th>数量</th>
+                            <th>金额</th>
+                            <th>状态</th>
+                            <th>创建时间</th>
+                            <th>过期时间</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                        <tr>
+                            <td>
+                                <div class="form-check">
+                                    <input class="form-check-input order-checkbox" type="checkbox" name="order_ids" value="{{ order.order_id }}">
+                                </div>
+                            </td>
+                            <td>{{ order.order_id }}</td>
+                            <td>
+                                {% if order.user %}
+                                    {{ order.user.username }}
+                                {% elif order.email %}
+                                    <span class="badge bg-secondary">匿名用户</span>
+                                    <small class="d-block text-muted">{{ order.email }}</small>
+                                {% else %}
+                                    <span class="badge bg-secondary">未知用户</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ order.product.name }}</td>
+                            <td>{{ order.quantity }}</td>
+                            <td>¥{{ "%.2f"|format(order.total_price) }}</td>
+                            <td>
+                                {% if order.status == 0 %}
+                                <span class="badge bg-warning">未支付</span>
+                                {% elif order.status == 1 %}
+                                <span class="badge bg-info">已支付</span>
+                                {% elif order.status == 2 %}
+                                <span class="badge bg-success">已完成</span>
+                                {% elif order.status == -1 %}
+                                <span class="badge bg-danger">已取消</span>
+                                {% elif order.status == -2 %}
+                                <span class="badge bg-danger">已过期</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ order.create_time.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                            <td>
+                                {% if order.expire_time %}
+                                    {% if order.status == 0 %}
+                                        {% if order.expire_time < now %}
+                                            <span class="text-danger">已过期</span>
+                                        {% else %}
+                                            {{ order.expire_time.strftime('%Y-%m-%d %H:%M:%S') }}
+                                        {% endif %}
+                                    {% else %}
+                                        {{ order.expire_time.strftime('%Y-%m-%d %H:%M:%S') }}
+                                    {% endif %}
+                                {% else %}
+                                    <span class="text-muted">--</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{{ url_for('admin.order_detail', order_id=order.order_id) }}" class="btn btn-sm btn-primary">查看</a>
+                                {% if order.status == 0 %}
+                                <a href="{{ url_for('admin.order_cancel', order_id=order.order_id) }}" class="btn btn-sm btn-danger" onclick="return confirm('确定要取消该订单吗？')">取消</a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="9" class="text-center">暂无订单</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            {% if pagination.pages > 1 %}
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    {% for page in pagination.iter_pages() %}
+                        {% if page %}
+                            {% if page != pagination.page %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('admin.order_list', page=page, status=status) }}">{{ page }}</a>
+                            </li>
+                            {% else %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ page }}</span>
+                            </li>
+                            {% endif %}
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link">...</span>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            </nav>
+            {% endif %}
+        </form>
+    </div>
+</div>
+
+<!-- 一键删除确认模态框 -->
+<div class="modal fade" id="deleteAllModal" tabindex="-1" aria-labelledby="deleteAllModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteAllModalLabel">确认删除</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    <strong>警告：</strong>此操作将删除所有订单，且无法恢复！
+                </div>
+                <p>您确定要删除所有订单吗？</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <form action="{{ url_for('admin.order_delete_all') }}" method="post">
+                    <button type="submit" class="btn btn-danger">确认删除</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 全选/取消全选
+        const selectAllCheckbox = document.getElementById('selectAll');
+        const orderCheckboxes = document.querySelectorAll('.order-checkbox');
+        const batchDeleteBtn = document.getElementById('batchDeleteBtn');
+        const batchForm = document.getElementById('batchForm');
+        
+        // 全选/取消全选
+        selectAllCheckbox.addEventListener('change', function() {
+            const isChecked = this.checked;
+            orderCheckboxes.forEach(checkbox => {
+                checkbox.checked = isChecked;
+            });
+            updateBatchDeleteButton();
+        });
+        
+        // 单个复选框变化时更新全选框和批量删除按钮状态
+        orderCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                updateSelectAllCheckbox();
+                updateBatchDeleteButton();
+            });
+        });
+        
+        // 更新全选框状态
+        function updateSelectAllCheckbox() {
+            const checkedCount = document.querySelectorAll('.order-checkbox:checked').length;
+            selectAllCheckbox.checked = checkedCount === orderCheckboxes.length && orderCheckboxes.length > 0;
+            selectAllCheckbox.indeterminate = checkedCount > 0 && checkedCount < orderCheckboxes.length;
+        }
+        
+        // 更新批量删除按钮状态
+        function updateBatchDeleteButton() {
+            const checkedCount = document.querySelectorAll('.order-checkbox:checked').length;
+            batchDeleteBtn.disabled = checkedCount === 0;
+        }
+        
+        // 批量删除按钮点击事件
+        batchDeleteBtn.addEventListener('click', function() {
+            if (confirm('确定要删除选中的订单吗？此操作无法恢复！')) {
+                batchForm.submit();
+            }
+        });
+    });
+</script>
+{% endblock %} 

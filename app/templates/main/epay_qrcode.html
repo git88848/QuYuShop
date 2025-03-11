@@ -1,0 +1,284 @@
+{% extends "base.html" %}
+
+{% block title %}支付订单 - {{ order.product.name if order.product else '商品' }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">首页</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('main.order_detail', order_id=order.order_id) }}">订单详情</a></li>
+            <li class="breadcrumb-item active" aria-current="page">支付订单</li>
+        </ol>
+    </nav>
+    
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">订单支付</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>订单信息</h5>
+                            <table class="table table-sm">
+                                <tr>
+                                    <th>商品名称：</th>
+                                    <td>{{ order.product.name if order.product else '商品' }}</td>
+                                </tr>
+                                <tr>
+                                    <th>商品数量：</th>
+                                    <td>{{ order.quantity }}</td>
+                                </tr>
+                                <tr>
+                                    <th>订单金额：</th>
+                                    <td class="text-danger font-weight-bold">¥ {{ order.total_price }}</td>
+                                </tr>
+                                <tr>
+                                    <th>订单编号：</th>
+                                    <td>{{ order.order_id }}</td>
+                                </tr>
+                                <tr>
+                                    <th>创建时间：</th>
+                                    <td>{{ order.create_time.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                                </tr>
+                                <tr>
+                                    <th>订单状态：</th>
+                                    <td>
+                                        {% if order.status == 0 %}
+                                            <span class="badge badge-warning">待支付</span>
+                                        {% elif order.status == 1 %}
+                                            <span class="badge badge-success">已支付</span>
+                                        {% else %}
+                                            <span class="badge badge-secondary">已关闭</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <div class="alert alert-warning">
+                                <i class="fas fa-clock"></i> 订单将在 <span id="countdown">15:00</span> 后过期，请尽快完成支付
+                            </div>
+                        </div>
+                        <div class="col-md-6 text-center">
+                            <h5>
+                                {% if pay_type == 'alipay' %}
+                                    <i class="fab fa-alipay text-primary"></i> 支付宝支付
+                                {% elif pay_type == 'wxpay' %}
+                                    <i class="fab fa-weixin text-success"></i> 微信支付
+                                {% elif pay_type == 'qqpay' %}
+                                    <i class="fab fa-qq text-info"></i> QQ钱包支付
+                                {% else %}
+                                    <i class="fas fa-credit-card"></i> 在线支付
+                                {% endif %}
+                            </h5>
+                            
+                            <div class="qrcode-container p-3 border rounded mb-3">
+                                {% if qrcode %}
+                                    <img src="{{ qrcode }}" alt="支付二维码" class="img-fluid" style="max-width: 200px;">
+                                {% else %}
+                                    <div class="alert alert-danger">
+                                        获取支付二维码失败，请刷新页面重试或选择其他支付方式
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <p class="text-muted">请使用
+                                {% if pay_type == 'alipay' %}
+                                    支付宝
+                                {% elif pay_type == 'wxpay' %}
+                                    微信
+                                {% elif pay_type == 'qqpay' %}
+                                    QQ钱包
+                                {% else %}
+                                    相应APP
+                                {% endif %}
+                                扫描二维码完成支付
+                            </p>
+                            
+                            {% if payurl %}
+                                <a href="{{ payurl }}" target="_blank" class="btn btn-primary mb-3">
+                                    <i class="fas fa-external-link-alt"></i> 打开支付页面
+                                </a>
+                            {% endif %}
+                            
+                            <div class="mt-3">
+                                <a href="{{ url_for('main.order_detail', order_id=order.order_id) }}" class="btn btn-success">
+                                    <i class="fas fa-check-circle"></i> 我已完成支付
+                                </a>
+                            </div>
+                            
+                            <hr class="my-4">
+                            
+                            <div class="payment-instructions">
+                                <h5 class="mb-3">支付说明</h5>
+                                <ol>
+                                    <li>请使用
+                                        {% if pay_type == 'alipay' %}
+                                            支付宝
+                                        {% elif pay_type == 'wxpay' %}
+                                            微信
+                                        {% elif pay_type == 'qqpay' %}
+                                            QQ钱包
+                                        {% else %}
+                                            相应APP
+                                        {% endif %}
+                                        扫描上方二维码进行支付。
+                                    </li>
+                                    <li>支付完成后，系统会自动处理您的订单，请耐心等待。</li>
+                                    <li>如果支付成功后页面没有自动跳转，请点击"我已完成支付"按钮查看订单状态。</li>
+                                    <li>如遇到支付问题，请联系客服获取帮助。</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">选择支付方式</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        <a href="javascript:void(0);" onclick="changePayType('alipay')" class="list-group-item list-group-item-action {% if pay_type == 'alipay' %}active{% endif %}">
+                            <i class="fab fa-alipay"></i> 支付宝支付
+                        </a>
+                        <a href="javascript:void(0);" onclick="changePayType('wxpay')" class="list-group-item list-group-item-action {% if pay_type == 'wxpay' %}active{% endif %}">
+                            <i class="fab fa-weixin"></i> 微信支付
+                        </a>
+                        <a href="javascript:void(0);" onclick="changePayType('qqpay')" class="list-group-item list-group-item-action {% if pay_type == 'qqpay' %}active{% endif %}">
+                            <i class="fab fa-qq"></i> QQ钱包支付
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">常见问题</h5>
+                </div>
+                <div class="card-body">
+                    <div class="accordion" id="faqAccordion">
+                        <div class="card">
+                            <div class="card-header" id="faqOne">
+                                <h2 class="mb-0">
+                                    <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                        支付成功但订单状态未更新？
+                                    </button>
+                                </h2>
+                            </div>
+                            <div id="collapseOne" class="collapse show" aria-labelledby="faqOne" data-parent="#faqAccordion">
+                                <div class="card-body">
+                                    请点击"我已完成支付"按钮刷新订单状态。如果仍未更新，请联系客服并提供您的订单号和支付凭证。
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header" id="faqTwo">
+                                <h2 class="mb-0">
+                                    <button class="btn btn-link btn-block text-left collapsed" type="button" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                        扫码支付时出现错误？
+                                    </button>
+                                </h2>
+                            </div>
+                            <div id="collapseTwo" class="collapse" aria-labelledby="faqTwo" data-parent="#faqAccordion">
+                                <div class="card-body">
+                                    请尝试刷新页面或选择其他支付方式。如果问题持续存在，请联系客服获取帮助。
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+    // 倒计时功能
+    function startCountdown(minutes) {
+        let totalSeconds = minutes * 60;
+        const countdownElement = document.getElementById('countdown');
+        
+        const countdownInterval = setInterval(function() {
+            totalSeconds--;
+            
+            if (totalSeconds <= 0) {
+                clearInterval(countdownInterval);
+                alert('订单已超时，请重新下单！');
+                window.location.href = "{{ url_for('main.order_detail', order_id=order.order_id) }}";
+                return;
+            }
+            
+            const minutesLeft = Math.floor(totalSeconds / 60);
+            const secondsLeft = totalSeconds % 60;
+            
+            countdownElement.textContent = 
+                (minutesLeft < 10 ? '0' + minutesLeft : minutesLeft) + ':' + 
+                (secondsLeft < 10 ? '0' + secondsLeft : secondsLeft);
+            
+            // 当剩余时间小于1分钟时，显示红色警告
+            if (totalSeconds < 60) {
+                countdownElement.classList.add('text-danger');
+            }
+        }, 1000);
+    }
+    
+    // 切换支付方式
+    function changePayType(type) {
+        // 显示加载中
+        Swal.fire({
+            title: '加载中...',
+            text: '正在获取支付二维码',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+        
+        // 发送AJAX请求获取新的支付二维码
+        $.ajax({
+            url: "{{ url_for('main.epay_pay', order_id=order.order_id) }}?type=" + type + "&ajax=1",
+            type: 'GET',
+            dataType: 'json',
+            success: function(response) {
+                Swal.close();
+                
+                if (response.code === 0) {
+                    // 刷新页面，显示新的支付方式
+                    window.location.href = "{{ url_for('main.epay_pay', order_id=order.order_id) }}?type=" + type;
+                } else {
+                    // 显示错误信息
+                    Swal.fire({
+                        icon: 'error',
+                        title: '获取支付信息失败',
+                        text: response.msg || '请稍后重试或选择其他支付方式'
+                    });
+                }
+            },
+            error: function() {
+                Swal.close();
+                
+                // 显示错误信息
+                Swal.fire({
+                    icon: 'error',
+                    title: '网络错误',
+                    text: '无法连接到服务器，请稍后重试'
+                });
+            }
+        });
+    }
+    
+    // 页面加载完成后启动倒计时（15分钟）
+    $(document).ready(function() {
+        startCountdown(15);
+    });
+</script>
+{% endblock %} 

@@ -1,0 +1,284 @@
+-<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}管理后台 - {{ site_name }}{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+    {% block styles %}{% endblock %}
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ url_for('admin.index') }}">
+                <i class="bi bi-speedometer2 me-2"></i>{{ site_name }}管理后台
+            </a>
+            <button class="navbar-toggler" type="button" aria-label="打开菜单" id="openSidebar">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('main.index') }}" target="_blank">
+                            <i class="bi bi-house-door me-1"></i>查看前台
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-person-circle me-1"></i>{{ current_user.username }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}"><i class="bi bi-box-arrow-right me-1"></i>退出登录</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 侧边栏 -->
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-header d-flex d-lg-none align-items-center justify-content-between p-3 border-bottom">
+        <h5 class="m-0">管理菜单</h5>
+        <button type="button" class="btn-close text-white" id="closeSidebar"></button>
+    </div>
+    <ul class="nav flex-column">
+        <li class="nav-item">
+            <a class="nav-link {% if request.endpoint == 'admin.index' %}active{% endif %}" href="{{ url_for('admin.index') }}">
+                <i class="bi bi-speedometer2"></i><span>控制面板</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if 'category' in request.endpoint %}active{% endif %}" href="{{ url_for('admin.category_list') }}">
+                <i class="bi bi-folder"></i><span>分类管理</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if 'product' in request.endpoint %}active{% endif %}" href="{{ url_for('admin.product_list') }}">
+                <i class="bi bi-box"></i><span>商品管理</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if 'card' in request.endpoint %}active{% endif %}" href="{{ url_for('admin.card_list') }}">
+                <i class="bi bi-credit-card"></i><span>卡密管理</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if 'order' in request.endpoint %}active{% endif %}" href="{{ url_for('admin.order_list') }}">
+                <i class="bi bi-cart"></i><span>订单管理</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if 'user' in request.endpoint %}active{% endif %}" href="{{ url_for('admin.user_list') }}">
+                <i class="bi bi-people"></i><span>用户管理</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if 'epay_config' in request.endpoint %}active{% endif %}" href="{{ url_for('admin.epay_config_list') }}">
+                <i class="bi bi-currency-exchange"></i><span>易支付配置</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if 'system_config' in request.endpoint %}active{% endif %}" href="{{ url_for('admin.system_config') }}">
+                <i class="bi bi-gear"></i><span>系统设置</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if 'statistics' in request.endpoint %}active{% endif %}" href="{{ url_for('admin.statistics') }}">
+                <i class="bi bi-graph-up"></i><span>访问统计</span>
+            </a>
+        </li>
+        <li class="nav-item mt-3 d-lg-none">
+            <a class="nav-link" href="{{ url_for('main.index') }}">
+                <i class="bi bi-house-door"></i><span>返回前台</span>
+            </a>
+        </li>
+        <li class="nav-item d-lg-none">
+            <a class="nav-link" href="{{ url_for('auth.logout') }}">
+                <i class="bi bi-box-arrow-right"></i><span>退出登录</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link " href="https://t.me/QUYUkjpd" target="_blank">
+                <i class="bi bi-broadcast"></i><span>飞机频道</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link " href="https://t.me/QUYUkjq" target="_blank">
+                <i class="bi bi-people"></i><span>飞机交流群</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link " href="https://t.me/Lawofforce" target="_blank">
+                <i class="bi bi-telegram"></i><span>作者飞机</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link " href="https://github.com/git88848" target="_blank">
+                <i class="bi bi-github"></i><span>作者GitHub</span>
+            </a>
+        </li>
+    </ul>
+    <div class="sidebar-footer d-none d-lg-block text-center p-3 mt-3 border-top">
+        <small class="text-muted"><a href="https://github.com/git88848" target="_blank" class="text-decoration-none text-muted">© 2025 趋于自助商城系统</a></small>
+    </div>
+</div>
+    
+    <!-- 侧边栏切换按钮 -->
+    <div class="sidebar-toggle d-none d-lg-flex" id="sidebarToggle">
+        <i class="bi bi-chevron-left" id="toggleIcon"></i>
+    </div>
+    
+    <!-- 侧边栏背景遮罩 -->
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+    
+    <!-- 内容区域 -->
+    <div class="content" id="content">
+        {% for category, message in get_flashed_messages(with_categories=true) %}
+        <div class="alert alert-{{ category if category != 'message' else 'info' }} alert-dismissible fade show">
+            <i class="bi bi-{% if category == 'success' %}check-circle{% elif category == 'danger' %}exclamation-triangle{% elif category == 'warning' %}exclamation-circle{% else %}info-circle{% endif %} me-2"></i>{{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+
+        <div class="fade-in">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const openSidebar = document.getElementById('openSidebar');
+            const closeSidebar = document.getElementById('closeSidebar');
+            const sidebar = document.getElementById('sidebar');
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const toggleIcon = document.getElementById('toggleIcon');
+            const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+            const content = document.getElementById('content');
+            
+            // 从本地存储中获取侧边栏状态
+            const sidebarCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+            
+            // 初始化侧边栏状态
+            if (sidebarCollapsed && window.innerWidth >= 992) {
+                sidebar.classList.add('collapsed');
+                sidebarToggle.classList.add('collapsed');
+                toggleIcon.classList.remove('bi-chevron-left');
+                toggleIcon.classList.add('bi-chevron-right');
+                content.classList.add('expanded');
+            }
+            
+            // 打开侧边栏（移动端）
+            if (openSidebar) {
+                openSidebar.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    sidebar.classList.add('show');
+                    sidebarBackdrop.classList.add('show');
+                    document.body.style.overflow = 'hidden'; // 防止背景滚动
+                });
+            }
+            
+            // 关闭侧边栏按钮
+            if (closeSidebar) {
+                closeSidebar.addEventListener('click', function() {
+                    sidebar.classList.remove('show');
+                    sidebarBackdrop.classList.remove('show');
+                    document.body.style.overflow = '';
+                });
+            }
+            
+            // 点击背景遮罩关闭侧边栏
+            sidebarBackdrop.addEventListener('click', function() {
+                sidebar.classList.remove('show');
+                sidebarBackdrop.classList.remove('show');
+                document.body.style.overflow = '';
+            });
+            
+            // 点击侧边栏链接后关闭侧边栏（在移动端）
+            const sidebarLinks = sidebar.querySelectorAll('.nav-link');
+            sidebarLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    if (window.innerWidth < 992) {
+                        sidebar.classList.remove('show');
+                        sidebarBackdrop.classList.remove('show');
+                        document.body.style.overflow = '';
+                    }
+                });
+            });
+            
+            // 侧边栏收缩切换（仅桌面端）
+            if (sidebarToggle) {
+                sidebarToggle.addEventListener('click', function() {
+                    if (window.innerWidth >= 992) {
+                        sidebar.classList.toggle('collapsed');
+                        sidebarToggle.classList.toggle('collapsed');
+                        content.classList.toggle('expanded');
+                        
+                        if (sidebar.classList.contains('collapsed')) {
+                            toggleIcon.classList.remove('bi-chevron-left');
+                            toggleIcon.classList.add('bi-chevron-right');
+                            localStorage.setItem('sidebarCollapsed', 'true');
+                        } else {
+                            toggleIcon.classList.remove('bi-chevron-right');
+                            toggleIcon.classList.add('bi-chevron-left');
+                            localStorage.setItem('sidebarCollapsed', 'false');
+                        }
+                    }
+                });
+            }
+            
+            // 窗口大小变化时处理
+            window.addEventListener('resize', function() {
+                if (window.innerWidth >= 992) {
+                    sidebar.classList.remove('show');
+                    sidebarBackdrop.classList.remove('show');
+                    document.body.style.overflow = '';
+                    
+                    // 恢复桌面端的收缩状态
+                    if (sidebarCollapsed) {
+                        sidebar.classList.add('collapsed');
+                        sidebarToggle.classList.add('collapsed');
+                        content.classList.add('expanded');
+                    }
+                } else {
+                    // 移动端始终展开侧边栏
+                    sidebar.classList.remove('collapsed');
+                    content.classList.remove('expanded');
+                }
+            });
+            
+            // 添加淡入效果
+            document.querySelectorAll('.card').forEach(card => {
+                card.classList.add('fade-in');
+            });
+            
+            // 添加波纹效果到所有按钮
+            document.querySelectorAll('.btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    const rect = btn.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    
+                    const ripple = document.createElement('span');
+                    ripple.classList.add('ripple');
+                    ripple.style.left = `${x}px`;
+                    ripple.style.top = `${y}px`;
+                    
+                    btn.appendChild(ripple);
+                    
+                    setTimeout(() => {
+                        ripple.remove();
+                    }, 600);
+                });
+            });
+        });
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html> 

@@ -1,0 +1,352 @@
+{% extends "admin/base.html" %}
+
+{% block title %}控制面板 - 管理后台{% endblock %}
+
+{% block content %}
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">控制面板</h1>
+    <span class="d-none d-sm-inline-block text-secondary">
+        <i class="bi bi-clock me-1"></i>{{ now.strftime('%Y-%m-%d %H:%M:%S') }}
+    </span>
+</div>
+
+<!-- 统计卡片 -->
+<div class="row mb-4">
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-primary shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                            总用户数</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ user_count }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-people-fill fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-success shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                            总订单数</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ order_count }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-cart-fill fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-info shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                            总商品数</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ product_count }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-box-fill fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-warning shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                            总卡密数</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ card_count }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-credit-card-fill fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- 订单状态统计 -->
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">订单状态统计</h5>
+            </div>
+            <div class="card-body">
+                <div class="chart-container" style="position: relative; height:240px;">
+                    <canvas id="orderStatusChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 商品销量排行 -->
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">商品销量排行</h5>
+            </div>
+            <div class="card-body">
+                <div class="chart-container" style="position: relative; height:240px;">
+                    <canvas id="productSalesChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 系统工具 -->
+<div class="card mb-4">
+    <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-primary">系统工具</h6>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row justify-content-center">
+            <div class="col-md-5 text-center mb-3">
+                <div class="card border-danger h-100">
+                    <div class="card-body">
+                        <h5 class="card-title text-danger"><i class="bi bi-trash me-2"></i>清除缓存</h5>
+                        <p class="card-text text-muted mb-3">清除所有Python缓存文件(__pycache__)，释放磁盘空间</p>
+                        <a href="{{ url_for('admin.clear_pycache') }}" class="btn btn-danger" onclick="return confirm('确定要清除所有__pycache__目录吗？');">
+                            立即清除
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-5 text-center mb-3">
+                <div class="card border-warning h-100">
+                    <div class="card-body">
+                        <h5 class="card-title text-warning"><i class="bi bi-clock-history me-2"></i>过期订单处理</h5>
+                        <p class="card-text text-muted mb-3">将长时间未支付的订单标记为已取消，释放库存</p>
+                        <a href="{{ url_for('admin.handle_expired_orders_view') }}" class="btn btn-warning">
+                            立即处理
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 访问统计摘要 -->
+<div class="card mb-4">
+    <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-primary">访问统计摘要</h6>
+            <a href="{{ url_for('admin.statistics') }}" class="btn btn-sm btn-primary">查看详情</a>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-4 text-center">
+                <h4 class="text-primary">{{ page_view_count }}</h4>
+                <p class="text-muted">总访问量</p>
+            </div>
+            <div class="col-md-4 text-center">
+                <h4 class="text-success">{{ today_view_count }}</h4>
+                <p class="text-muted">今日访问量</p>
+            </div>
+            <div class="col-md-4 text-center">
+                <h4 class="text-info">{{ yesterday_view_count }}</h4>
+                <p class="text-muted">昨日访问量</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 最近订单 -->
+<div class="card mb-4">
+    <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-primary">最近订单</h6>
+            <a href="{{ url_for('admin.order_list') }}" class="btn btn-sm btn-primary">查看全部</a>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>订单号</th>
+                        <th>用户</th>
+                        <th>商品</th>
+                        <th>数量</th>
+                        <th>金额</th>
+                        <th>状态</th>
+                        <th>创建时间</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in recent_orders %}
+                    <tr>
+                        <td>{{ order.order_id }}</td>
+                        <td>
+                            {% if order.user %}
+                                {{ order.user.username }}
+                            {% elif order.email %}
+                                <span class="badge bg-secondary">匿名用户</span>
+                                <small class="d-block text-muted">{{ order.email }}</small>
+                            {% else %}
+                                <span class="badge bg-secondary">未知用户</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ order.product.name }}</td>
+                        <td>{{ order.quantity }}</td>
+                        <td>¥{{ "%.2f"|format(order.total_price) }}</td>
+                        <td>
+                            {% if order.status == 0 %}
+                            <span class="badge bg-warning">未支付</span>
+                            {% elif order.status == 1 %}
+                            <span class="badge bg-info">已支付</span>
+                            {% elif order.status == 2 %}
+                            <span class="badge bg-success">已完成</span>
+                            {% elif order.status == -1 %}
+                            <span class="badge bg-danger">已取消</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ order.create_time.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                        <td>
+                            <a href="{{ url_for('admin.order_detail', order_id=order.order_id) }}" class="btn btn-sm btn-primary">查看</a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center">暂无订单</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- 最近用户 -->
+<div class="card mb-4">
+    <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-primary">最近注册用户</h6>
+            <a href="{{ url_for('admin.user_list') }}" class="btn btn-sm btn-primary">查看全部</a>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>用户名</th>
+                        <th>邮箱</th>
+                        <th>注册时间</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in recent_users %}
+                    <tr>
+                        <td>{{ user.id }}</td>
+                        <td>{{ user.username }}</td>
+                        <td>{{ user.email }}</td>
+                        <td>{{ user.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                        <td>
+                            <a href="{{ url_for('admin.user_list') }}" class="btn btn-sm btn-primary">查看用户</a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center">暂无用户</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 订单状态统计图表
+        const orderStatusCtx = document.getElementById('orderStatusChart').getContext('2d');
+        const orderStatusChart = new Chart(orderStatusCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['未支付', '已支付', '已完成', '已取消'],
+                datasets: [{
+                    data: [
+                        {{ order_status_counts.get(0, 0) }}, 
+                        {{ order_status_counts.get(1, 0) }}, 
+                        {{ order_status_counts.get(2, 0) }}, 
+                        {{ order_status_counts.get(-1, 0) }}
+                    ],
+                    backgroundColor: [
+                        '#f6c23e',  // 未支付 - 黄色
+                        '#36b9cc',  // 已支付 - 蓝色
+                        '#1cc88a',  // 已完成 - 绿色
+                        '#e74a3b'   // 已取消 - 红色
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                    }
+                },
+                cutout: '70%'
+            }
+        });
+        
+        // 商品销量排行图表
+        const productSalesCtx = document.getElementById('productSalesChart').getContext('2d');
+        const productSalesChart = new Chart(productSalesCtx, {
+            type: 'bar',
+            data: {
+                labels: [{% for product in top_products %}'{{ product.name }}'{% if not loop.last %}, {% endif %}{% endfor %}],
+                datasets: [{
+                    label: '销量',
+                    data: [{% for product in top_products %}{{ product.sales }}{% if not loop.last %}, {% endif %}{% endfor %}],
+                    backgroundColor: '#4e73df',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %} 

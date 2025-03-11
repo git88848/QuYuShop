@@ -1,0 +1,290 @@
+{% extends "base.html" %}
+
+{% block title %}首页 - {{ site_name }}{% endblock %}
+
+{% block content %}
+<!-- 英雄区域 -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="text-center">
+                    <h1 class="hero-title" data-aos="fade-up">{{ site_title or site_name }}</h1>
+                    <p class="hero-subtitle" data-aos="fade-up" data-aos-delay="100">{{ site_description }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 分类展示区域 -->
+{% if categories %}
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="section-title" data-aos="fade-up">商品分类</h2>
+        </div>
+        <div class="row g-4 justify-content-center">
+            {% for category in categories %}
+            <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="{{ loop.index * 100 }}">
+                <a href="{{ url_for('main.category', id=category.id) }}" class="text-decoration-none">
+                    <div class="category-card h-100 shadow-hover">
+                        <div class="card-body text-center p-4">
+                            <i class="bi {{ category.icon }} mb-3 category-icon"></i>
+                            <h3 class="h4 mb-2 category-title">{{ category.name }}</h3>
+                            <p class="text-muted mb-0 category-desc">{{ category.description or '' }}</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- 商品展示区域 -->
+{% if products %}
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="section-title" data-aos="fade-up">热门商品</h2>
+        </div>
+        <div class="row g-4 justify-content-center">
+            {% for product in products %}
+            <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="{{ loop.index * 100 }}">
+                <div class="card h-100 shadow-sm">
+                    {% if product.image and product.image.strip() %}
+                    <img src="{{ url_for('static', filename=config['UPLOAD_FOLDER'] + '/' + product.image) }}" class="card-img-top" alt="{{ product.name }}">
+                    {% else %}
+                    <img src="{{ url_for('static', filename='uploads/credit-cards.jpg') }}" class="card-img-top" alt="{{ product.name }}">
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">{{ product.name }}</h5>
+                        <p class="card-text text-muted">{{ product.description or '' }}</p>
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <div class="card-price">¥{{ "%.2f"|format(product.price) }}</div>
+                            <div class="text-muted small">库存: {{ product.stock }}</div>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent border-top-0 pb-4">
+                        <div class="d-grid">
+                            <a href="{{ url_for('main.product', id=product.id) }}" class="btn btn-primary">
+                                立即购买
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="text-center mt-5" data-aos="fade-up">
+            <a href="{{ url_for('main.products') }}" class="btn btn-outline-primary btn-lg">
+                <i class="bi bi-grid me-2"></i>查看全部商品
+            </a>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- 特色功能区域 -->
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="section-title" data-aos="fade-up">我们的特色</h2>
+        </div>
+        <div class="row g-4 justify-content-center">
+            <div class="col-md-4" data-aos="fade-up">
+                <div class="feature-card text-center h-100 p-4 shadow-sm rounded">
+                    <i class="bi bi-shield-check mb-4 fs-1"></i>
+                    <h3 class="h5 mb-3">安全可靠</h3>
+                    <p class="text-muted mb-0">采用先进的加密技术，保障您的交易安全</p>
+                </div>
+            </div>
+            <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
+                <div class="feature-card text-center h-100 p-4 shadow-sm rounded">
+                    <i class="bi bi-lightning-charge mb-4 fs-1"></i>
+                    <h3 class="h5 mb-3">即时发货</h3>
+                    <p class="text-muted mb-0">支付成功后系统自动发货，无需等待</p>
+                </div>
+            </div>
+            <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
+                <div class="feature-card text-center h-100 p-4 shadow-sm rounded">
+                    <i class="bi bi-headset mb-4 fs-1"></i>
+                    <h3 class="h5 mb-3">贴心服务</h3>
+                    <p class="text-muted mb-0">专业的客服团队，为您解答各种疑问</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<style>
+.hero-section {
+    background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+    padding: 4rem 0;
+    margin-bottom: 2rem;
+    color: white;
+}
+
+.hero-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.hero-subtitle {
+    font-size: 1.2rem;
+    opacity: 0.9;
+}
+
+.section-title {
+    font-weight: 700;
+    color: #2c3e50;
+    position: relative;
+    display: inline-block;
+    padding-bottom: 10px;
+}
+
+.section-title::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    transform: translateX(-50%);
+    width: 50px;
+    height: 3px;
+    background-color: #4e73df;
+}
+
+.category-card {
+    background: white;
+    border-radius: 15px;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0,0,0,0.05);
+    overflow: hidden;
+}
+
+.shadow-hover {
+    transition: all 0.3s ease;
+}
+
+.shadow-hover:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+.category-icon {
+    font-size: 2.5rem;
+    color: #4e73df;
+    background: rgba(78,115,223,0.1);
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    margin: 0 auto 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.category-card:hover .category-icon {
+    background: #4e73df;
+    color: white;
+    transform: scale(1.1);
+}
+
+.category-title {
+    color: #2c3e50;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    transition: all 0.3s ease;
+}
+
+.category-desc {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: #6c757d;
+}
+
+.category-card:hover .category-title {
+    color: #4e73df;
+}
+
+.card {
+    border: none;
+    border-radius: 10px;
+    transition: transform 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.card-price {
+    color: #4e73df;
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.feature-card {
+    background: white;
+    border: none;
+    transition: transform 0.3s ease;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+}
+
+.feature-card i {
+    color: #4e73df;
+}
+
+@media (max-width: 768px) {
+    .hero-title {
+        font-size: 2rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1rem;
+    }
+    
+    .category-icon {
+        width: 60px;
+        height: 60px;
+        font-size: 2rem;
+    }
+    
+    .category-title {
+        font-size: 1.1rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 平滑滚动到锚点
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                
+                if (targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    });
+</script>
+{% endblock %} 

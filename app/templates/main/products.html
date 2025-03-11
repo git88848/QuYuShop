@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+
+{% block title %}所有商品 - {{ site_name }}{% endblock %}
+
+{% block content %}
+<!-- 商品列表页面 -->
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h1 class="section-title" data-aos="fade-up">所有商品</h1>
+            <p class="text-muted" data-aos="fade-up" data-aos-delay="100">浏览我们的全部商品，找到您需要的服务</p>
+        </div>
+
+        <!-- 筛选和搜索区域 -->
+        <div class="row mb-4" data-aos="fade-up">
+            <div class="col-md-4 mb-3 mb-md-0">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    <input type="text" id="searchInput" class="form-control" placeholder="搜索商品...">
+                </div>
+            </div>
+            <div class="col-md-4 mb-3 mb-md-0">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-tag"></i></span>
+                    <select id="categoryFilter" class="form-select">
+                        <option value="all">所有分类</option>
+                        {% for category in categories %}
+                        <option value="{{ category.id }}">{{ category.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-sort-down"></i></span>
+                    <select id="sortOrder" class="form-select">
+                        <option value="default">默认排序</option>
+                        <option value="price-asc">价格从低到高</option>
+                        <option value="price-desc">价格从高到低</option>
+                        <option value="sales">销量优先</option>
+                        <option value="newest">最新上架</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- 商品展示区域 -->
+        <div id="productsContainer" class="row g-4">
+            {% for product in products %}
+            <div class="col-md-6 col-lg-4 product-item" data-category="{{ product.category_id }}" data-price="{{ product.price }}" data-sales="{{ product.sales }}" data-id="{{ product.id }}">
+                <div class="card h-100 shadow-hover product-card">
+                    {% if product.image and product.image.strip() %}
+                    <img src="{{ url_for('static', filename=config['UPLOAD_FOLDER'] + '/' + product.image) }}" class="card-img-top product-img" alt="{{ product.name }}">
+                    {% else %}
+                    <img src="{{ url_for('static', filename='uploads/credit-cards.jpg') }}" class="card-img-top product-img" alt="{{ product.name }}">
+                    {% endif %}
+                    <div class="card-body">
+                        <h3 class="card-title h5">{{ product.name }}</h3>
+                        <p class="card-text text-muted small">{{ product.description|truncate(100) }}</p>
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <div>
+                                <span class="price-tag">¥{{ product.price }}</span>
+                                <small class="text-muted ms-2">库存: {{ product.stock }}</small>
+                            </div>
+                            <a href="{{ url_for('main.product', id=product.id) }}" class="btn btn-primary btn-sm">
+                                <i class="bi bi-cart-plus me-1"></i>购买
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="col-12 text-center py-5">
+                <div class="empty-state">
+                    <i class="bi bi-bag-x display-1 text-muted"></i>
+                    <h3 class="mt-3">暂无商品</h3>
+                    <p class="text-muted">目前没有上架的商品，请稍后再来查看。</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- 筛选和排序的JavaScript -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const categoryFilter = document.getElementById('categoryFilter');
+    const sortOrder = document.getElementById('sortOrder');
+    const productsContainer = document.getElementById('productsContainer');
+    const productItems = document.querySelectorAll('.product-item');
+    
+    // 筛选和排序函数
+    function filterAndSortProducts() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const selectedCategory = categoryFilter.value;
+        const selectedSort = sortOrder.value;
+        
+        // 创建一个数组来存储可见的产品
+        let visibleProducts = Array.from(productItems);
+        
+        // 按搜索词筛选
+        if (searchTerm) {
+            visibleProducts = visibleProducts.filter(item => {
+                const title = item.querySelector('.card-title').textContent.toLowerCase();
+                const description = item.querySelector('.card-text').textContent.toLowerCase();
+                return title.includes(searchTerm) || description.includes(searchTerm);
+            });
+        }
+        
+        // 按分类筛选
+        if (selectedCategory !== 'all') {
+            visibleProducts = visibleProducts.filter(item => {
+                return item.dataset.category === selectedCategory;
+            });
+        }
+        
+        // 排序产品
+        if (selectedSort !== 'default') {
+            visibleProducts.sort((a, b) => {
+                if (selectedSort === 'price-asc') {
+                    return parseFloat(a.dataset.price) - parseFloat(b.dataset.price);
+                } else if (selectedSort === 'price-desc') {
+                    return parseFloat(b.dataset.price) - parseFloat(a.dataset.price);
+                } else if (selectedSort === 'sales') {
+                    return parseInt(b.dataset.sales || 0) - parseInt(a.dataset.sales || 0);
+                } else if (selectedSort === 'newest') {
+                    return parseInt(b.dataset.id) - parseInt(a.dataset.id);
+                }
+                return 0;
+            });
+        }
+        
+        // 隐藏所有产品
+        productItems.forEach(item => {
+            item.style.display = 'none';
+        });
+        
+        // 显示筛选后的产品
+        visibleProducts.forEach(item => {
+            item.style.display = 'block';
+        });
+        
+        // 如果没有产品可见，显示空状态
+        if (visibleProducts.length === 0) {
+            let emptyState = document.createElement('div');
+            emptyState.className = 'col-12 text-center py-5';
+            emptyState.innerHTML = `
+                <div class="empty-state">
+                    <i class="bi bi-search display-1 text-muted"></i>
+                    <h3 class="mt-3">未找到商品</h3>
+                    <p class="text-muted">没有找到符合条件的商品，请尝试其他筛选条件。</p>
+                </div>
+            `;
+            productsContainer.appendChild(emptyState);
+        } else {
+            // 移除可能存在的空状态
+            const existingEmptyState = productsContainer.querySelector('.empty-state');
+            if (existingEmptyState) {
+                existingEmptyState.parentElement.remove();
+            }
+        }
+    }
+    
+    // 添加事件监听器
+    searchInput.addEventListener('input', filterAndSortProducts);
+    categoryFilter.addEventListener('change', filterAndSortProducts);
+    sortOrder.addEventListener('change', filterAndSortProducts);
+});
+</script>
+
+<!-- 自定义样式 -->
+<style>
+.product-img, .product-img-placeholder {
+    height: 200px;
+    object-fit: cover;
+}
+.price-tag {
+    font-weight: bold;
+    color: #ff6b6b;
+    font-size: 1.1rem;
+}
+.product-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+.empty-state {
+    padding: 3rem 0;
+}
+</style>
+{% endblock %}

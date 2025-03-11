@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block title %}订单详情 - 个人发卡系统{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">首页</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('main.order_list') }}">我的订单</a></li>
+        <li class="breadcrumb-item active" aria-current="page">订单详情</li>
+    </ol>
+</nav>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">订单信息</h5>
+    </div>
+    <div class="card-body">
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <p><strong>订单号：</strong>{{ order.order_id }}</p>
+                <p><strong>商品名称：</strong>{{ order.product.name }}</p>
+                <p><strong>购买数量：</strong>{{ order.quantity }}</p>
+                <p><strong>订单金额：</strong>¥{{ "%.2f"|format(order.total_price) }}</p>
+            </div>
+            <div class="col-md-6">
+                <p>
+                    <strong>订单状态：</strong>
+                    {% if order.status == 0 %}
+                    <span class="badge bg-warning">未支付</span>
+                    {% elif order.status == 1 %}
+                    <span class="badge bg-info">已支付</span>
+                    {% elif order.status == 2 %}
+                    <span class="badge bg-success">已完成</span>
+                    {% elif order.status == -1 %}
+                    <span class="badge bg-danger">已取消</span>
+                    {% elif order.status == -2 %}
+                    <span class="badge bg-danger">已过期</span>
+                    {% endif %}
+                </p>
+                <p><strong>创建时间：</strong>{{ order.create_time.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+                {% if order.expire_time %}
+                <p>
+                    <strong>过期时间：</strong>
+                    {% if order.status == 0 and order.expire_time < now %}
+                    <span class="text-danger">{{ order.expire_time.strftime('%Y-%m-%d %H:%M:%S') }} (已过期)</span>
+                    {% else %}
+                    {{ order.expire_time.strftime('%Y-%m-%d %H:%M:%S') }}
+                    {% endif %}
+                </p>
+                {% endif %}
+                {% if order.pay_time %}
+                <p><strong>支付时间：</strong>{{ order.pay_time.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if order.status == 0 %}
+            {% if order.expire_time and order.expire_time < now %}
+            <div class="alert alert-danger">
+                <i class="bi bi-exclamation-triangle me-2"></i>订单已过期，无法支付。请重新下单。
+            </div>
+            {% else %}
+            <div class="d-grid gap-2">
+                <a href="{{ url_for('main.pay', order_id=order.order_id) }}" class="btn btn-primary">
+                    <i class="bi bi-credit-card me-1"></i>去支付
+                </a>
+                {% if order.expire_time %}
+                <div class="text-center text-muted small">
+                    <i class="bi bi-clock me-1"></i>订单将在 {{ order.expire_time.strftime('%Y-%m-%d %H:%M:%S') }} 过期
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+        {% elif order.status == 1 or order.status == 2 %}
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0">卡密信息</h5>
+                </div>
+                <div class="card-body">
+                    {% if cards and cards|length > 0 %}
+                        {% for card in cards %}
+                        <div class="mb-3">
+                            <label class="form-label">卡密 #{{ loop.index }}</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" value="{{ card.card_info }}" readonly>
+                                <button class="btn btn-outline-secondary copy-btn" type="button" data-clipboard-text="{{ card.card_info }}">复制</button>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="alert alert-warning">
+                            <i class="bi bi-exclamation-triangle me-2"></i>暂无卡密信息，请联系管理员
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+{% if order.status == 1 or order.status == 2 %}
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">卡密信息</h5>
+    </div>
+    <div class="card-body">
+        <div class="alert alert-success">
+            <i class="bi bi-check-circle-fill me-2"></i>订单已支付，以下是您购买的卡密信息
+        </div>
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>序号</th>
+                        <th>卡密信息</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for card in order.cards %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td><code>{{ card.card_info }}</code></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %} 

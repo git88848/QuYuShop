@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+
+{% block title %}模拟支付 - {{ order.product.name if order.product else '商品' }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">模拟易支付 - 测试环境</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i> 
+                        这是一个模拟的支付环境，用于测试。在实际环境中，您将被重定向到真实的支付平台。
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h5>订单信息</h5>
+                            <table class="table table-sm">
+                                <tr>
+                                    <th>订单号：</th>
+                                    <td>{{ order.order_id }}</td>
+                                </tr>
+                                <tr>
+                                    <th>商品名称：</th>
+                                    <td>{{ order.product.name if order.product else '未知商品' }}</td>
+                                </tr>
+                                <tr>
+                                    <th>支付金额：</th>
+                                    <td class="text-danger font-weight-bold">¥ {{ order.total_price }}</td>
+                                </tr>
+                                <tr>
+                                    <th>创建时间：</th>
+                                    <td>{{ order.create_time.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6 text-center">
+                            <h5>模拟二维码</h5>
+                            <div class="qrcode-container p-3 border rounded">
+                                <img src="{{ url_for('static', filename='img/qrcode_demo.png') }}" alt="支付二维码" class="img-fluid" style="max-width: 200px;">
+                            </div>
+                            <p class="text-muted mt-2">请使用支付宝/微信扫描二维码支付</p>
+                        </div>
+                    </div>
+                    
+                    <div class="payment-options">
+                        <h5>选择支付方式</h5>
+                        <div class="btn-group btn-group-toggle w-100 mb-4" data-toggle="buttons">
+                            <label class="btn btn-outline-primary active">
+                                <input type="radio" name="payment_type" value="alipay" checked> 
+                                <i class="fab fa-alipay"></i> 支付宝
+                            </label>
+                            <label class="btn btn-outline-success">
+                                <input type="radio" name="payment_type" value="wxpay"> 
+                                <i class="fab fa-weixin"></i> 微信支付
+                            </label>
+                            <label class="btn btn-outline-info">
+                                <input type="radio" name="payment_type" value="qqpay"> 
+                                <i class="fab fa-qq"></i> QQ钱包
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center">
+                        <button id="complete-payment" class="btn btn-lg btn-success">
+                            <i class="fas fa-check-circle"></i> 模拟完成支付
+                        </button>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="text-center">
+                        <a href="{{ url_for('main.order_detail', order_id=order.order_id) }}" class="btn btn-sm btn-secondary">
+                            <i class="fas fa-arrow-left"></i> 返回订单详情
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+$(document).ready(function() {
+    // 切换支付方式
+    $('input[name="payment_type"]').change(function() {
+        // 在实际应用中，这里可以根据支付方式更新二维码
+        console.log('支付方式切换为：' + $(this).val());
+    });
+    
+    // 模拟完成支付
+    $('#complete-payment').click(function() {
+        var btn = $(this);
+        btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> 处理中...');
+        
+        // 发送完成支付请求
+        $.ajax({
+            url: '{{ url_for("main.mock_epay_complete", out_trade_no=order.order_id) }}',
+            type: 'POST',
+            dataType: 'json',
+            success: function(response) {
+                if(response.code === 0) {
+                    // 显示成功消息
+                    Swal.fire({
+                        title: '支付成功',
+                        text: '您的订单已支付成功！',
+                        icon: 'success',
+                        confirmButtonText: '查看订单'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = response.redirect;
+                        }
+                    });
+                } else {
+                    // 显示错误消息
+                    Swal.fire({
+                        title: '支付失败',
+                        text: response.msg || '处理支付时发生错误',
+                        icon: 'error',
+                        confirmButtonText: '确定'
+                    });
+                    btn.prop('disabled', false).html('<i class="fas fa-check-circle"></i> 模拟完成支付');
+                }
+            },
+            error: function() {
+                // 显示错误消息
+                Swal.fire({
+                    title: '请求错误',
+                    text: '无法连接到服务器，请稍后再试',
+                    icon: 'error',
+                    confirmButtonText: '确定'
+                });
+                btn.prop('disabled', false).html('<i class="fas fa-check-circle"></i> 模拟完成支付');
+            }
+        });
+    });
+});
+</script>
+{% endblock %} 

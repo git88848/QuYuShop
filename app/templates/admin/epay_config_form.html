@@ -1,0 +1,271 @@
+{% extends "admin/base.html" %}
+
+{% block title %}{{ title }} - 管理后台{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0 text-gray-800">{{ title }}</h1>
+    <a href="{{ url_for('admin.epay_config_list') }}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left me-1"></i>返回列表
+    </a>
+</div>
+
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h5 class="mb-0 font-weight-bold">配置信息</h5>
+    </div>
+    <div class="card-body">
+        <form method="post">
+            {{ form.hidden_tag() }}
+            
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        {{ form.api_url.label(class="form-label") }}
+                        {{ form.api_url(class="form-control") }}
+                        {% if form.api_url.description %}
+                        <small class="form-text text-muted">{{ form.api_url.description }}</small>
+                        {% endif %}
+                        {% if form.api_url.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.api_url.errors %}
+                            <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        {{ form.pid.label(class="form-label") }}
+                        {{ form.pid(class="form-control") }}
+                        {% if form.pid.description %}
+                        <small class="form-text text-muted">{{ form.pid.description }}</small>
+                        {% endif %}
+                        {% if form.pid.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.pid.errors %}
+                            <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group mb-3">
+                {{ form.key.label(class="form-label") }}
+                <div class="input-group">
+                    {{ form.key(class="form-control", id="key-field") }}
+                    <button class="btn btn-outline-secondary" type="button" id="toggle-key">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                </div>
+                {% if form.key.description %}
+                <small class="form-text text-muted">{{ form.key.description }}</small>
+                {% endif %}
+                {% if form.key.errors %}
+                <div class="invalid-feedback d-block">
+                    {% for error in form.key.errors %}
+                    <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        {{ form.notify_url.label(class="form-label") }}
+                        {{ form.notify_url(class="form-control") }}
+                        {% if form.notify_url.description %}
+                        <small class="form-text text-muted">{{ form.notify_url.description }}</small>
+                        {% endif %}
+                        {% if form.notify_url.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.notify_url.errors %}
+                            <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        {{ form.return_url.label(class="form-label") }}
+                        {{ form.return_url(class="form-control") }}
+                        {% if form.return_url.description %}
+                        <small class="form-text text-muted">{{ form.return_url.description }}</small>
+                        {% endif %}
+                        {% if form.return_url.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.return_url.errors %}
+                            <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group mb-4">
+                <div class="form-check form-switch">
+                    {{ form.is_active(class="form-check-input") }}
+                    {{ form.is_active.label(class="form-check-label") }}
+                </div>
+                {% if form.is_active.description %}
+                <small class="form-text text-muted">{{ form.is_active.description }}</small>
+                {% endif %}
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">支付方式设置</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-check form-switch mb-3">
+                                {{ form.alipay_enabled(class="form-check-input") }}
+                                {{ form.alipay_enabled.label(class="form-check-label") }}
+                                {% if form.alipay_enabled.description %}
+                                <div><small class="form-text text-muted">{{ form.alipay_enabled.description }}</small></div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-check form-switch mb-3">
+                                {{ form.wxpay_enabled(class="form-check-input") }}
+                                {{ form.wxpay_enabled.label(class="form-check-label") }}
+                                {% if form.wxpay_enabled.description %}
+                                <div><small class="form-text text-muted">{{ form.wxpay_enabled.description }}</small></div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-check form-switch mb-3">
+                                {{ form.qqpay_enabled(class="form-check-input") }}
+                                {{ form.qqpay_enabled.label(class="form-check-label") }}
+                                {% if form.qqpay_enabled.description %}
+                                <div><small class="form-text text-muted">{{ form.qqpay_enabled.description }}</small></div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="alert alert-info mb-4">
+                <i class="bi bi-info-circle me-2"></i>
+                <strong>提示：</strong> 如果启用此配置，系统将自动禁用其他易支付配置。
+            </div>
+            
+            <div class="d-flex justify-content-between">
+                <a href="{{ url_for('admin.epay_config_list') }}" class="btn btn-secondary">取消</a>
+                {{ form.submit(class="btn btn-primary") }}
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow">
+    <div class="card-header py-3">
+        <h5 class="mb-0 font-weight-bold">易支付接入说明</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <h5 class="mb-3">参数说明</h5>
+                <ul class="list-group list-group-flush mb-4">
+                    <li class="list-group-item d-flex">
+                        <i class="bi bi-1-circle me-3 text-primary"></i>
+                        <div>
+                            <strong>接口地址</strong>
+                            <p class="mb-0 text-muted">易支付平台的接口地址，例如：https://mzf.haohe.de</p>
+                        </div>
+                    </li>
+                    <li class="list-group-item d-flex">
+                        <i class="bi bi-2-circle me-3 text-primary"></i>
+                        <div>
+                            <strong>商户ID (pid)</strong>
+                            <p class="mb-0 text-muted">在易支付平台注册后获取的商户ID</p>
+                        </div>
+                    </li>
+                    <li class="list-group-item d-flex">
+                        <i class="bi bi-3-circle me-3 text-primary"></i>
+                        <div>
+                            <strong>商户密钥 (key)</strong>
+                            <p class="mb-0 text-muted">在易支付平台注册后获取的商户密钥</p>
+                        </div>
+                    </li>
+                    <li class="list-group-item d-flex">
+                        <i class="bi bi-4-circle me-3 text-primary"></i>
+                        <div>
+                            <strong>异步通知地址</strong>
+                            <p class="mb-0 text-muted">支付成功后，易支付平台会向此地址发送通知</p>
+                        </div>
+                    </li>
+                    <li class="list-group-item d-flex">
+                        <i class="bi bi-5-circle me-3 text-primary"></i>
+                        <div>
+                            <strong>同步通知地址</strong>
+                            <p class="mb-0 text-muted">支付成功后，用户浏览器会跳转到此地址</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <h5 class="mb-3">注意事项</h5>
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    <strong>重要提示：</strong>
+                    <p class="mb-0">请确保您的易支付账号已经通过实名认证，并且已经开通了相应的支付接口。</p>
+                </div>
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle me-2"></i>
+                    <strong>使用建议：</strong>
+                    <ul class="mb-0">
+                        <li>异步通知地址和同步通知地址必须是可以公网访问的URL</li>
+                        <li>如果您的网站在本地测试，可以使用内网穿透工具</li>
+                        <li>建议定期检查易支付平台的通知和公告</li>
+                        <li>支付方式包括：支付宝(alipay)、微信支付(wxpay)、QQ钱包(qqpay)</li>
+                    </ul>
+                </div>
+                <div class="alert alert-success">
+                    <i class="bi bi-check-circle me-2"></i>
+                    <strong>测试提示：</strong>
+                    <p class="mb-0">在本地开发环境中，系统会自动使用模拟支付接口，生成测试二维码。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 密钥显示/隐藏切换
+        const toggleKeyBtn = document.getElementById('toggle-key');
+        const keyField = document.getElementById('key-field');
+        
+        toggleKeyBtn.addEventListener('click', function() {
+            const type = keyField.getAttribute('type') === 'password' ? 'text' : 'password';
+            keyField.setAttribute('type', type);
+            
+            // 切换图标
+            const icon = toggleKeyBtn.querySelector('i');
+            if (type === 'password') {
+                icon.classList.remove('bi-eye-slash');
+                icon.classList.add('bi-eye');
+            } else {
+                icon.classList.remove('bi-eye');
+                icon.classList.add('bi-eye-slash');
+            }
+        });
+        
+        // 初始设置为密码类型
+        keyField.setAttribute('type', 'password');
+    });
+</script>
+{% endblock %} 

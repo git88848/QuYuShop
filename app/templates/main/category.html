@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}{{ category.name }} - 发卡系统{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">首页</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ category.name }}</li>
+    </ol>
+</nav>
+
+<div class="category-header mb-5" data-aos="fade-up">
+    <div class="card shadow-sm">
+        <div class="card-body p-4">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="display-6 fw-bold mb-2">{{ category.name }}</h1>
+                    <p class="lead text-muted mb-0">{{ category.description }}</p>
+                </div>
+                <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                    <span class="badge bg-primary p-2 fs-6">
+                        <i class="bi bi-box me-1"></i>共 {{ products|length }} 个商品
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    {% for product in products %}
+    <div class="col-md-3 mb-4" data-aos="fade-up" data-aos-delay="{{ loop.index * 100 }}">
+        <div class="card h-100">
+            {% if product.image and product.image.strip() %}
+            <img src="{{ url_for('static', filename=config['UPLOAD_FOLDER'] + '/' + product.image) }}" class="card-img-top" alt="{{ product.name }}">
+            {% else %}
+            <img src="{{ url_for('static', filename='uploads/credit-cards.jpg') }}" class="card-img-top" alt="{{ product.name }}">
+            {% endif %}
+            <div class="card-body">
+                <h5 class="card-title">{{ product.name }}</h5>
+                <p class="card-text text-truncate">{{ product.description }}</p>
+                <p class="card-price">¥{{ "%.2f"|format(product.price) }}</p>
+                <div class="card-meta">
+                    <span><i class="bi bi-box me-1"></i>库存: {{ product.stock }}</span>
+                    <span><i class="bi bi-graph-up me-1"></i>销量: {{ product.sales }}</span>
+                </div>
+            </div>
+            <div class="card-footer">
+                <a href="{{ url_for('main.product', id=product.id) }}" class="btn btn-primary w-100">
+                    <i class="bi bi-eye me-1"></i>查看详情
+                </a>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-12" data-aos="fade-up">
+        <div class="card shadow-sm">
+            <div class="card-body p-5 text-center">
+                <i class="bi bi-inbox text-muted" style="font-size: 4rem;"></i>
+                <h3 class="mt-3">该分类下暂无商品</h3>
+                <p class="text-muted">我们正在努力添加更多商品，请稍后再来查看</p>
+                <a href="{{ url_for('main.index') }}" class="btn btn-primary mt-3">
+                    <i class="bi bi-house me-1"></i>返回首页
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% if products|length > 0 %}
+<div class="text-center mt-4 mb-5" data-aos="fade-up">
+    <a href="{{ url_for('main.index') }}" class="btn btn-outline-primary">
+        <i class="bi bi-arrow-left me-1"></i>返回首页
+    </a>
+</div>
+{% endif %}
+{% endblock %} 

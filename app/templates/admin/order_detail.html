@@ -1,0 +1,117 @@
+{% extends "admin/base.html" %}
+
+{% block title %}订单详情 - 管理后台{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('admin.index') }}">控制面板</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('admin.order_list') }}">订单管理</a></li>
+        <li class="breadcrumb-item active" aria-current="page">订单详情</li>
+    </ol>
+</nav>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">订单信息</h5>
+            <div>
+                {% if order.status == 0 %}
+                <a href="{{ url_for('admin.order_cancel', order_id=order.order_id) }}" class="btn btn-danger" onclick="return confirm('确定要取消该订单吗？')">取消订单</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <p><strong>订单号：</strong>{{ order.order_id }}</p>
+                {% if order.user %}
+                    <p><strong>用户名：</strong>{{ order.user.username }}</p>
+                    <p><strong>用户邮箱：</strong>{{ order.user.email }}</p>
+                {% elif order.email %}
+                    <p><strong>用户类型：</strong><span class="badge bg-secondary">匿名用户</span></p>
+                    <p><strong>用户邮箱：</strong>{{ order.email }}</p>
+                {% else %}
+                    <p><strong>用户类型：</strong><span class="badge bg-secondary">未知用户</span></p>
+                {% endif %}
+                <p><strong>商品名称：</strong>{{ order.product.name }}</p>
+                <p><strong>购买数量：</strong>{{ order.quantity }}</p>
+                <p><strong>订单金额：</strong>¥{{ "%.2f"|format(order.total_price) }}</p>
+            </div>
+            <div class="col-md-6">
+                <p>
+                    <strong>订单状态：</strong>
+                    {% if order.status == 0 %}
+                    <span class="badge bg-warning">未支付</span>
+                    {% elif order.status == 1 %}
+                    <span class="badge bg-info">已支付</span>
+                    {% elif order.status == 2 %}
+                    <span class="badge bg-success">已完成</span>
+                    {% elif order.status == -1 %}
+                    <span class="badge bg-danger">已取消</span>
+                    {% elif order.status == -2 %}
+                    <span class="badge bg-danger">已过期</span>
+                    {% endif %}
+                </p>
+                <p><strong>创建时间：</strong>{{ order.create_time.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+                {% if order.expire_time %}
+                <p>
+                    <strong>过期时间：</strong>
+                    {% if order.status == 0 and order.expire_time < now %}
+                    <span class="text-danger">{{ order.expire_time.strftime('%Y-%m-%d %H:%M:%S') }} (已过期)</span>
+                    {% else %}
+                    {{ order.expire_time.strftime('%Y-%m-%d %H:%M:%S') }}
+                    {% endif %}
+                </p>
+                {% endif %}
+                {% if order.pay_time %}
+                <p><strong>支付时间：</strong>{{ order.pay_time.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+                {% endif %}
+                {% if order.pay_type %}
+                <p><strong>支付方式：</strong>{{ order.pay_type }}</p>
+                {% endif %}
+                {% if order.trade_no %}
+                <p><strong>交易号：</strong>{{ order.trade_no }}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if order.status == 1 or order.status == 2 %}
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">卡密信息</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>序号</th>
+                        <th>卡密ID</th>
+                        <th>卡密信息</th>
+                        <th>创建时间</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for card in order.cards %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ card.id }}</td>
+                        <td><code>{{ card.card_info }}</code></td>
+                        <td>{{ card.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" class="text-center">暂无卡密信息</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %} 
