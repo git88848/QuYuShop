@@ -154,6 +154,7 @@
 ```bash
 # 打开终端执行将系统中所有Python相关的755可执行文件的权限
 sudo chmod -R 755 /usr/bin/python*
+
 # 进入你的网站目录
 cd /www/wwwroot/你的站点目录
 
@@ -163,9 +164,10 @@ ps aux | grep "python3 run.py"
 # 终止进程（PID为进程ID，请替换为实际值）
 kill -9 PID
 
-# 重新启动应用
 # 先激活虚拟环境
 source myenv/bin/activate
+
+# 重新启动应用
 nohup python3 run.py > web.log 2>&1 &
 ```
 
