@@ -218,7 +218,7 @@ nohup python3 run.py > web.log 2>&1 &
 - 查看卡密信息
 
 ## 📋 更新日志
-前往 https://github.com/git88848/QuYuShop/commit/48edb5fe5e6fd9bdd14afe90580e0dfd066ccdaf 查看
+前往 https://github.com/git88848/QuYuShop/blob/main/%E6%9B%B4%E6%96%B0%E6%97%A5%E5%BF%97.md 查看
 
 ## 🤝 联系方式与社群
 
