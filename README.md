@@ -38,14 +38,14 @@
    ```
    # 应用密钥
    SECRET_KEY=随机字符串
-   
+
    # 数据库连接
    DATABASE_URL=mysql+pymysql://你的数据库用户名:你的数据库密码@localhost/你的数据库名?charset=utf8mb4
-   
+
    # 管理员账号
    ADMIN_USERNAME=admin
    ADMIN_PASSWORD=123456
-   
+
    # 上传目录
    UPLOAD_FOLDER=uploads
    ```
@@ -66,23 +66,23 @@
 
 #### 🔮 3. 创建虚拟环境
 
-1. **📂 打开终端进入站点目录**
-   ```bash
-   cd /www/wwwroot/你的站点目录
-   ```
-   
-   给系统中所有Python相关的程序添加可执行权限
+1. **🔒 打开终端执行将系统中所有Python相关的755可执行文件的权限**
    ```bash
    sudo chmod -R 755 /usr/bin/python*
    ```
-   
+
+2. **📂 进入站点目录**
+   ```bash
+   cd /www/wwwroot/你的站点目录
+   ```
+
 3. **🏗️ 创建虚拟环境**
    ```bash
    python3 -m venv 环境名称
    例如：
    python3 -m venv myenv
    ```
-   
+
 4. **🚀 激活虚拟环境**
    ```bash
    source myenv/bin/activate
@@ -105,7 +105,7 @@
    ```bash
    # 后台运行应用
    nohup python3 run.py > web.log 2>&1 &
-   
+
    # 查看应用是否成功启动
    ps aux | grep "python3 run.py"
    ```
@@ -150,7 +150,11 @@
   ```
 
 ### 🔄 3. 重启应用
+
 ```bash
+# 打开终端执行将系统中所有Python相关的755可执行文件的权限
+sudo chmod -R 755 /usr/bin/python*
+
 # 进入你的网站目录
 cd /www/wwwroot/你的站点目录
 
@@ -160,9 +164,10 @@ ps aux | grep "python3 run.py"
 # 终止进程（PID为进程ID，请替换为实际值）
 kill -9 PID
 
-# 重新启动应用
 # 先激活虚拟环境
 source myenv/bin/activate
+
+# 重新启动应用
 nohup python3 run.py > web.log 2>&1 &
 ```
 
@@ -216,9 +221,6 @@ nohup python3 run.py > web.log 2>&1 &
 - 查看历史订单
 - 管理个人信息
 - 查看卡密信息
-
-## 📋 更新日志
-前往 https://github.com/git88848/QuYuShop/blob/main/%E6%9B%B4%E6%96%B0%E6%97%A5%E5%BF%97.md 查看
 
 ## 🤝 联系方式与社群
 
