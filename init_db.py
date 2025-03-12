@@ -90,7 +90,13 @@ def init_db():
             'enable_telegram_notify': '1',  # 是否启用Telegram通知，1启用，0禁用
 
             # 验证码设置
-            'enable_captcha': '1',  # 是否启用验证码，1启用，0禁用
+            'enable_captcha': '1',  # 是否启用注册验证码，1启用，0禁用
+            'enable_admin_login_captcha': '1',  # 是否启用管理员登录验证码，1启用，0禁用
+            'enable_user_login_captcha': '1',  # 是否启用用户登录验证码，1启用，0禁用
+            
+            # 订单设置
+            'order_expire_minutes': '15',  # 订单过期时间（分钟），默认15分钟
+            'order_check_interval': '60',  # 自动检查过期订单的时间间隔（秒），默认60秒
         }
 
         for key, value in default_configs.items():
