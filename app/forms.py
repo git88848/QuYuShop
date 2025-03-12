@@ -7,6 +7,7 @@ from app.models import User, Category, Product
 class LoginForm(FlaskForm):
     username = StringField('用户名', validators=[DataRequired(), Length(1, 64)])
     password = PasswordField('密码', validators=[DataRequired()])
+    captcha = StringField('验证码', validators=[Optional(), Length(4, 4)])
     remember_me = BooleanField('记住我')
     submit = SubmitField('登录')
 

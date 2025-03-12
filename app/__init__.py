@@ -82,79 +82,87 @@ def create_app():
     @app.context_processor
     def inject_site_info():
         from .models import SystemConfig
-        from flask import request
         
-        # 获取系统配置
+        # 网站基本信息
         site_name = SystemConfig.get_value('site_name', '趋于自助商城系统')
         site_title = SystemConfig.get_value('site_title', '趋于自助商城系统')
         site_description = SystemConfig.get_value('site_description', '趋于自助商城系统，人人都可拥有自己的独立商城')
         site_keywords = SystemConfig.get_value('site_keywords', '趋于自助商城系统')
-        # 从请求中自动获取网站域名
-        site_url = SystemConfig.get_value('site_url', request.host_url.rstrip('/'))
+        about_us = SystemConfig.get_value('about_us', '趋于自助商城系统，人人都可拥有自己的独立商城')
+        footer_text = SystemConfig.get_value('footer_text', '© 2025 趋于自助商城系统')
+        footer_link = SystemConfig.get_value('footer_link', 'https://github.com/git88848')
+        
+        # 网站资源设置
+        site_url = SystemConfig.get_value('site_url', 'http://127.0.0.1:5000')
         site_logo = SystemConfig.get_value('site_logo', '/static/img/logo.png')
         site_favicon = SystemConfig.get_value('site_favicon', '/static/img/favicon.ico')
         
-        # 页脚信息
-        footer_text = SystemConfig.get_value('footer_text', '© 2025 趋于自助商城系统')
-        footer_link = SystemConfig.get_value('footer_link', 'https://github.com/git88848')
-        about_us = SystemConfig.get_value('about_us', '趋于自助商城系统，人人都可拥有自己的独立商城')
-        
-        # 联系方式
+        # 联系方式设置
         contact_email = SystemConfig.get_value('contact_email', 'admin@example.com')
         contact_phone = SystemConfig.get_value('contact_phone', '(907) 793-9460')
+        show_email = SystemConfig.get_value('show_email', '0') == '1'
+        show_phone = SystemConfig.get_value('show_phone', '0') == '1'
         
         # 微信设置
         site_weixin = SystemConfig.get_value('site_weixin', 'weixin888')
-        show_weixin = SystemConfig.get_value('show_weixin', '0') == str(1)  # 默认不显示
+        show_weixin = SystemConfig.get_value('show_weixin', '0') == '1'
         
-        # Telegram 信息
+        # Telegram设置
         telegram_username = SystemConfig.get_value('telegram_username', 'Lawofforce')
         telegram_channel = SystemConfig.get_value('telegram_channel', 'QUYUkjpd')
         telegram_group = SystemConfig.get_value('telegram_group', 'QUYUkjq')
-        
-        # 显示控制
-        show_email = SystemConfig.get_value('show_email', '0') == str(1)
-        show_phone = SystemConfig.get_value('show_phone', '0') == str(1)
-        show_telegram_username = SystemConfig.get_value('show_telegram_username', '1') == str(1)
-        show_telegram_channel = SystemConfig.get_value('show_telegram_channel', '1') == str(1)
-        show_telegram_group = SystemConfig.get_value('show_telegram_group', '1') == str(1)
+        show_telegram_username = SystemConfig.get_value('show_telegram_username', '1') == '1'
+        show_telegram_channel = SystemConfig.get_value('show_telegram_channel', '1') == '1'
+        show_telegram_group = SystemConfig.get_value('show_telegram_group', '1') == '1'
+        show_telegram_contact = SystemConfig.get_value('show_telegram_contact', '1') == '1'
         
         # Telegram机器人设置
         telegram_bot_token = SystemConfig.get_value('telegram_bot_token', '7175153476:AAHHtjZ9P_8u0BzQTkeQBJFCY4hLhBSKCRE')
         telegram_chat_id = SystemConfig.get_value('telegram_chat_id', '-1001923404194')
-        enable_telegram_notify = SystemConfig.get_value('enable_telegram_notify', '1') == str(1)
+        enable_telegram_notify = SystemConfig.get_value('enable_telegram_notify', '1') == '1'
         
-        # 验证码配置
-        enable_captcha = SystemConfig.get_value('enable_captcha', '1') == str(1)
+        # 验证码设置
+        enable_captcha = SystemConfig.get_value('enable_captcha', '1') == '1'  # 是否启用注册验证码
+        enable_admin_login_captcha = SystemConfig.get_value('enable_admin_login_captcha', '1') == '1'  # 是否启用管理员登录验证码
+        enable_user_login_captcha = SystemConfig.get_value('enable_user_login_captcha', '1') == '1'  # 是否启用用户登录验证码
         
-        return dict(
-            site_name=site_name,
-            site_title=site_title,
-            site_description=site_description,
-            site_keywords=site_keywords,
-            site_url=site_url,
-            site_logo=site_logo,
-            site_favicon=site_favicon,
-            footer_text=footer_text,
-            footer_link=footer_link,
-            about_us=about_us,
-            contact_email=contact_email,
-            contact_phone=contact_phone,
-            site_weixin=site_weixin,
-            show_weixin=show_weixin,
-            telegram_username=telegram_username,
-            telegram_channel=telegram_channel,
-            telegram_group=telegram_group,
-            show_email=show_email,
-            show_phone=show_phone,
-            show_telegram_username=show_telegram_username,
-            show_telegram_channel=show_telegram_channel,
-            show_telegram_group=show_telegram_group,
-            telegram_bot_token=telegram_bot_token,
-            telegram_chat_id=telegram_chat_id,
-            enable_telegram_notify=enable_telegram_notify,
-            enable_captcha=enable_captcha
-        )
+        # 订单设置
+        order_expire_minutes = SystemConfig.get_value('order_expire_minutes', '15')  # 订单过期时间（分钟），默认15分钟
+        order_check_interval = SystemConfig.get_value('order_check_interval', '60')  # 自动检查过期订单的时间间隔（秒），默认60秒
+        
+        return {
+            'site_name': site_name,
+            'site_title': site_title,
+            'site_description': site_description,
+            'site_keywords': site_keywords,
+            'about_us': about_us,
+            'footer_text': footer_text,
+            'footer_link': footer_link,
+            'site_url': site_url,
+            'site_logo': site_logo,
+            'site_favicon': site_favicon,
+            'contact_email': contact_email,
+            'contact_phone': contact_phone,
+            'show_email': show_email,
+            'show_phone': show_phone,
+            'site_weixin': site_weixin,
+            'show_weixin': show_weixin,
+            'telegram_username': telegram_username,
+            'telegram_channel': telegram_channel,
+            'telegram_group': telegram_group,
+            'show_telegram_username': show_telegram_username,
+            'show_telegram_channel': show_telegram_channel,
+            'show_telegram_group': show_telegram_group,
+            'show_telegram_contact': show_telegram_contact,
+            'telegram_bot_token': telegram_bot_token,
+            'telegram_chat_id': telegram_chat_id,
+            'enable_telegram_notify': enable_telegram_notify,
+            'enable_captcha': enable_captcha,
+            'enable_admin_login_captcha': enable_admin_login_captcha,
+            'enable_user_login_captcha': enable_user_login_captcha,
+            'order_expire_minutes': order_expire_minutes,
+            'order_check_interval': order_check_interval,
+        }
     
     # 添加自定义过滤器
     @app.template_filter('nl2br')

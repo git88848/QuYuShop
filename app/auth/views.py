@@ -11,21 +11,74 @@ def login():
     if current_user.is_authenticated:
         return redirect(url_for('main.index'))
     
+    # 普通用户登录，检查是否需要验证码
+    enable_captcha = SystemConfig.get_value('enable_user_login_captcha', '1') == '1'
+    
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
+        
+        # 验证码验证
+        if enable_captcha:
+            if not form.captcha.data:
+                flash('请输入验证码')
+                return render_template('auth/login.html', form=form, enable_captcha=enable_captcha, is_admin=False)
+            if not CaptchaUtil.verify_captcha(session.get('captcha_code', ''), form.captcha.data):
+                flash('验证码错误')
+                return render_template('auth/login.html', form=form, enable_captcha=enable_captcha, is_admin=False)
+        
         if user is not None and user.verify_password(form.password.data):
+            # 检查是否是管理员账号
+            if user.is_admin:
+                flash('管理员账号请使用管理员登录入口')
+                return render_template('auth/login.html', form=form, enable_captcha=enable_captcha, is_admin=False)
+            
             login_user(user, form.remember_me.data)
             next = request.args.get('next')
             if next is None or not next.startswith('/'):
-                if user.is_admin:
-                    next = url_for('admin.index')
-                else:
-                    next = url_for('main.index')
+                next = url_for('main.index')
+            return redirect(next)
+        flash('用户名或密码错误')
+        return render_template('auth/login.html', form=form, enable_captcha=enable_captcha, is_admin=False)
+    
+    return render_template('auth/login.html', form=form, enable_captcha=enable_captcha, is_admin=False)
+
+@auth.route('/admin/login', methods=['GET', 'POST'])
+def admin_login():
+    if current_user.is_authenticated:
+        if current_user.is_admin:
+            return redirect(url_for('admin.index'))
+        return redirect(url_for('main.index'))
+    
+    # 管理员登录，检查是否需要验证码
+    enable_captcha = SystemConfig.get_value('enable_admin_login_captcha', '1') == '1'
+    
+    form = LoginForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(username=form.username.data).first()
+        
+        # 验证码验证
+        if enable_captcha:
+            if not form.captcha.data:
+                flash('请输入验证码')
+                return render_template('auth/login.html', form=form, enable_captcha=enable_captcha, is_admin=True)
+            if not CaptchaUtil.verify_captcha(session.get('captcha_code', ''), form.captcha.data):
+                flash('验证码错误')
+                return render_template('auth/login.html', form=form, enable_captcha=enable_captcha, is_admin=True)
+        
+        if user is not None and user.verify_password(form.password.data):
+            if not user.is_admin:
+                flash('您没有管理员权限')
+                return render_template('auth/login.html', form=form, enable_captcha=enable_captcha, is_admin=True)
+            
+            login_user(user, form.remember_me.data)
+            next = request.args.get('next')
+            if next is None or not next.startswith('/'):
+                next = url_for('admin.index')
             return redirect(next)
         flash('用户名或密码错误')
     
-    return render_template('auth/login.html', form=form)
+    return render_template('auth/login.html', form=form, enable_captcha=enable_captcha, is_admin=True)
 
 @auth.route('/logout')
 @login_required

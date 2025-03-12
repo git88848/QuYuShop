@@ -677,6 +677,13 @@ def system_config():
             
             # 验证码设置
             enable_captcha = '1' if request.form.get('enable_captcha') else '0'
+            enable_admin_login_captcha = '1' if request.form.get('enable_admin_login_captcha') else '0'
+            enable_user_login_captcha = '1' if request.form.get('enable_user_login_captcha') else '0'
+            
+            # 保存验证码设置
+            SystemConfig.set_value('enable_captcha', enable_captcha, '是否启用注册验证码')
+            SystemConfig.set_value('enable_admin_login_captcha', enable_admin_login_captcha, '是否启用管理员登录验证码')
+            SystemConfig.set_value('enable_user_login_captcha', enable_user_login_captcha, '是否启用用户登录验证码')
             
             # Telegram机器人设置
             telegram_bot_token = request.form.get('telegram_bot_token', '')
@@ -708,9 +715,6 @@ def system_config():
             # 保存网站域名设置
             site_url = request.form.get('site_url', '')
             SystemConfig.set_value('site_url', site_url)
-            
-            # 保存验证码设置
-            SystemConfig.set_value('enable_captcha', enable_captcha)
             
             # 保存Telegram机器人设置
             SystemConfig.set_value('telegram_bot_token', telegram_bot_token)
@@ -783,9 +787,12 @@ def system_config():
                          site_favicon=config_dict.get('site_favicon', ''),
                          site_weixin=config_dict.get('site_weixin', ''),
                          show_weixin=config_dict.get('show_weixin') == '1',
-                         captcha_enabled=config_dict.get('captcha_enabled') == '1',
-                         captcha_appid=config_dict.get('captcha_appid', ''),
-                         captcha_secret=config_dict.get('captcha_secret', ''))
+                         enable_captcha=config_dict.get('enable_captcha') == '1',
+                         enable_admin_login_captcha=config_dict.get('enable_admin_login_captcha') == '1',
+                         enable_user_login_captcha=config_dict.get('enable_user_login_captcha') == '1',
+                         # 添加订单过期时间和自动检查间隔的配置值
+                         order_expire_minutes=config_dict.get('order_expire_minutes', '15'),
+                         order_check_interval=config_dict.get('order_check_interval', '60'))
 
 @admin.route('/handle_expired_orders_view')
 @login_required
